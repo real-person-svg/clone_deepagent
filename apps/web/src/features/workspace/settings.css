@@ -1,0 +1,48 @@
+.settings-statistics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border: 1px solid #ebebef;
+  border-radius: 9px;
+  padding: 20px 0;
+  background: #ffffff;
+}
+.settings-statistics > div {
+  display: grid;
+  gap: 8px;
+  text-align: center;
+  border-right: 1px solid #ebebef;
+}
+.settings-statistics > div:last-child {
+  border: 0;
+}
+.settings-statistics strong {
+  font-size: 23px;
+  font-weight: 450;
+  color: #6b6b73;
+}
+.settings-statistics span {
+  font-size: 12px;
+  color: #8e8e96;
+}
+.settings-model {
+  background: #ffffff;
+  padding: 14px;
+  border: 1px solid #d8d8de;
+  border-radius: 8px;
+}
+.settings-model strong {
+  font-size: 12px;
+  font-weight: 500;
+  color: #6b6b73;
+}
+.settings-model > span {
+  font-size: 12px;
+  margin-left: 13px;
+  color: #8e8e96;
+}
+.settings-model p {
+  font-size: 12px;
+  line-height: 1.9;
+  color: #8e8e96;
+  margin: 10px 0 0;
+}

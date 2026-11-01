@@ -1,0 +1,454 @@
+@media (min-width: 1550px) {
+  .empty-chat {
+    padding-top: 90px;
+    padding-bottom: 60px;
+  }
+  .empty-chat h2 {
+    font-size: 29px;
+  }
+  .empty-description {
+    font-size: 13px;
+  }
+  .prompt-grid {
+    gap: 15px;
+  }
+  .prompt-grid > button {
+    padding: 21px 18px;
+  }
+  .management-page {
+    padding: 45px 50px;
+  }
+  .agent-grid {
+    gap: 22px;
+  }
+}
+@media (max-width: 1100px) {
+  .sidebar {
+    width: 280px;
+    flex-basis: 280px;
+  }
+  .brand strong {
+    font-size: 15px;
+  }
+  .brand > div > span {
+    font-size: 12px;
+  }
+  .brand {
+    gap: 6px;
+  }
+  .collapse-button {
+    right: -5px;
+  }
+  .header-badges {
+    gap: 8px;
+  }
+  .header-badges > .dataset-label {
+    display: none;
+  }
+  .management-page {
+    padding: 30px 26px;
+  }
+  .agent-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .empty-chat {
+    padding-top: 40px;
+  }
+  .empty-chat h2 {
+    font-size: 23px;
+  }
+  .prompt-grid > button {
+    padding: 13px 11px;
+  }
+  .prompt-grid > button > strong {
+    font-size: 12px;
+  }
+  .prompt-grid > button > span {
+    font-size: 12px;
+  }
+  .prompt-grid > button > p {
+    margin-bottom: 13px;
+  }
+  .subscription-guide > .dataset-label {
+    display: none;
+  }
+}
+@media (max-width: 720px) {
+  .app-shell {
+    padding: 0;
+  }
+  .sidebar {
+    width: 220px;
+    flex-basis: 220px;
+    padding-top: 14px;
+  }
+  .sidebar-collapsed .sidebar {
+    width: 48px;
+    flex-basis: 48px;
+    padding-left: 5px;
+    padding-right: 5px;
+  }
+  .sidebar-collapsed .collapse-button {
+    left: 4px;
+  }
+  .sidebar-collapsed .brand-emblem {
+    width: 26px;
+  }
+  .main-panel {
+    border-radius: 16px 0 0;
+  }
+  .page-header {
+    height: 62px;
+    padding: 0 17px;
+  }
+  .page-header h1 {
+    font-size: 13px;
+    max-width: 60vw;
+  }
+  .page-header > div > span {
+    font-size: 12px;
+  }
+  .header-badges > .subtle-badge {
+    font-size: 12px;
+  }
+  .header-badges {
+    display: none;
+  }
+  .empty-chat {
+    padding: 30px 16px 20px;
+    justify-content: center;
+  }
+  .empty-emblem {
+    width: 54px;
+    height: 54px;
+    border-radius: 17px;
+    margin-bottom: 19px;
+  }
+  .empty-emblem span {
+    font-size: 38px;
+  }
+  .empty-chat > .eyebrow {
+    font-size: 12px;
+    letter-spacing: 1.5px;
+  }
+  .empty-chat h2 {
+    font-size: 20px;
+    letter-spacing: 0.5px;
+    text-align: center;
+  }
+  .empty-description {
+    font-size: 12px;
+    line-height: 1.9;
+    margin-bottom: 24px;
+  }
+  .prompt-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    max-width: 350px;
+  }
+  .prompt-grid > button {
+    padding: 11px 12px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 3px 8px;
+  }
+  .prompt-grid > button > p {
+    grid-column: 1/-1;
+    margin-bottom: 3px;
+    font-size: 12px;
+  }
+  .prompt-grid > button > p > svg {
+    width: 13px;
+    height: 13px;
+  }
+  .prompt-grid > button > strong {
+    margin: 0;
+    font-size: 12px;
+  }
+  .prompt-grid > button > span {
+    font-size: 12px;
+    margin: 0;
+    grid-column: 1/-1;
+  }
+  .empty-note {
+    font-size: 12px;
+    line-height: 1.8;
+    margin-top: 17px;
+    text-align: center;
+  }
+  .composer-wrap {
+    padding: 8px 14px 12px;
+  }
+  .composer {
+    border-radius: 14px;
+    padding: 12px 12px 8px;
+  }
+  .composer textarea {
+    font-size: 13px;
+    line-height: 22px;
+    min-height: 44px;
+  }
+  .composer-caption {
+    font-size: 12px;
+    gap: 8px;
+    padding-top: 7px;
+  }
+  .composer-toolbar {
+    margin-top: 6px;
+  }
+  .composer-left,
+  .composer-right {
+    gap: 2px;
+  }
+  .provider-button {
+    font-size: 12px;
+    gap: 4px;
+  }
+  .mode-toggle {
+    font-size: 12px;
+    gap: 3px;
+    padding: 4px;
+  }
+  .composer-left > .icon-button {
+    width: 23px;
+  }
+  .send-button {
+    width: 29px;
+    height: 29px;
+    margin-left: 5px;
+  }
+  .conversation-content {
+    padding: 22px 16px 8px;
+  }
+  .user-message {
+    max-width: 92%;
+    font-size: 13px;
+    margin-bottom: 25px;
+    padding: 9px 12px;
+  }
+  .markdown {
+    font-size: 13px;
+    line-height: 1.9;
+  }
+  .markdown h1 {
+    font-size: 18px;
+  }
+  .markdown h2 {
+    font-size: 15px;
+  }
+  .trace-summary {
+    font-size: 12px;
+  }
+  .trace-meta {
+    font-size: 12px;
+  }
+  .identity-provider {
+    display: none;
+  }
+  .section-topbar {
+    height: 49px;
+    padding: 0 17px;
+  }
+  .section-topbar > span {
+    font-size: 12px;
+  }
+  .management-page {
+    padding: 25px 17px;
+  }
+  .management-heading {
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 23px;
+  }
+  .management-heading h1 {
+    font-size: 22px;
+  }
+  .management-heading p {
+    font-size: 12px;
+    line-height: 1.8;
+  }
+  .management-heading .eyebrow {
+    font-size: 12px;
+    letter-spacing: 1.5px;
+  }
+  .management-heading .subtle-badge {
+    display: none;
+  }
+  .management-heading .semi-button {
+    font-size: 12px;
+    height: 30px;
+    padding: 0 9px;
+    flex-shrink: 0;
+    margin-top: 5px;
+  }
+  .agent-grid {
+    grid-template-columns: 1fr;
+    gap: 13px;
+  }
+  .agent-card {
+    padding: 17px 16px 0;
+  }
+  .agent-card-top {
+    margin-bottom: 14px;
+  }
+  .agent-card > p {
+    min-height: 0;
+    margin-bottom: 13px;
+  }
+  .tool-chips {
+    margin-bottom: 18px;
+  }
+  .source-list {
+    grid-template-columns: 1fr;
+  }
+  .source-toolbar {
+    align-items: center;
+  }
+  .filter-input {
+    min-width: 0;
+    flex: 1;
+  }
+  .filter-input input {
+    width: 100%;
+  }
+  .source-toolbar > span {
+    font-size: 12px;
+    white-space: nowrap;
+  }
+  .info-strip {
+    font-size: 12px;
+    padding: 10px;
+    gap: 7px;
+  }
+  .subscription-guide {
+    padding: 14px;
+    gap: 11px;
+  }
+  .guide-icon {
+    width: 32px;
+    height: 32px;
+  }
+  .subscription-guide strong {
+    font-size: 12px;
+  }
+  .subscription-guide p {
+    font-size: 12px;
+  }
+  .subscription-card {
+    padding: 17px 14px;
+  }
+  .subscription-card-heading h2 {
+    font-size: 12px;
+  }
+  .subscription-card > p {
+    font-size: 12px;
+  }
+  .subscription-facts {
+    gap: 9px;
+    font-size: 12px;
+    margin-bottom: 16px;
+  }
+  .subscription-card-footer {
+    flex-wrap: wrap;
+  }
+  .subscription-card-footer > span {
+    font-size: 12px;
+  }
+  .subscription-card-footer > div {
+    margin-left: auto;
+  }
+  .subscription-card-footer .button-secondary {
+    font-size: 12px;
+    padding: 6px 8px;
+  }
+  .panel-empty {
+    padding: 70px 10px;
+  }
+  .panel-empty h2 {
+    font-size: 14px;
+    line-height: 1.8;
+  }
+  .panel-empty p {
+    font-size: 12px;
+  }
+  .notification-item {
+    padding: 15px;
+    gap: 10px;
+  }
+  .notification-title h2 {
+    font-size: 12px;
+    line-height: 1.8;
+  }
+  .notification-symbol {
+    width: 27px;
+    height: 30px;
+  }
+  .notification-body {
+    font-size: 12px;
+  }
+  .notification-footer {
+    gap: 10px;
+  }
+  .notification-footer > span {
+    font-size: 12px;
+  }
+  .notification-footer .text-button {
+    font-size: 12px;
+  }
+  .report-document {
+    padding: 25px 17px 40px;
+  }
+  .report-toolbar {
+    padding: 10px 16px;
+    gap: 8px;
+  }
+  .report-toolbar > div {
+    gap: 10px;
+  }
+  .report-toolbar .text-button {
+    font-size: 12px;
+  }
+  .report-list-item {
+    padding: 15px;
+    gap: 11px;
+  }
+  .report-list-item h2 {
+    font-size: 12px;
+  }
+  .report-list-item p {
+    font-size: 12px;
+  }
+  .form-columns {
+    gap: 12px;
+  }
+  .drawer-content {
+    padding: 25px 20px;
+  }
+  .provider-menu {
+    max-width: calc(100vw - 90px);
+    width: 260px;
+  }
+}
+@media (hover: none) {
+  .history-actions {
+    pointer-events: auto;
+    opacity: 1;
+    background: inherit;
+  }
+  .history-link {
+    padding-right: 57px;
+  }
+  .icon-button {
+    min-width: 28px;
+    min-height: 28px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}

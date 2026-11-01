@@ -1,0 +1,69 @@
+.template-section {
+  margin-bottom: 29px;
+}
+.template-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 13px;
+}
+.template-heading h2 {
+  font-size: 12px;
+  font-weight: 500;
+  color: #6b6b73;
+  margin: 0;
+}
+.template-heading > span {
+  font-size: 12px;
+  color: #8e8e96;
+}
+.template-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.template-card {
+  padding: 16px;
+  border: 1px solid #d8d8de;
+  border-radius: 9px;
+  background: #ffffff;
+}
+.template-card > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #8e8e96;
+}
+.template-card strong {
+  font-size: 12px;
+  font-weight: 500;
+  color: #6b6b73;
+}
+.template-card .version-tag {
+  margin-left: auto;
+  white-space: nowrap;
+}
+.template-card > p {
+  font-size: 12px;
+  line-height: 1.9;
+  color: #8e8e96;
+  margin: 12px 0 15px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.template-card footer {
+  display: flex;
+  justify-content: space-between;
+  border-top: 1px solid #ebebef;
+  padding-top: 6px;
+}
+.template-card .text-button {
+  font-size: 12px;
+}
+@media (max-width: 900px) {
+  .template-grid {
+    grid-template-columns: 1fr;
+  }
+}

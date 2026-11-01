@@ -1,0 +1,49 @@
+.semi-modal-content {
+  border-radius: 13px !important;
+}
+.semi-modal-title {
+  font-size: 15px !important;
+  font-weight: 500 !important;
+}
+.semi-modal-body {
+  font-size: 13px !important;
+  line-height: 1.9;
+}
+.semi-button {
+  font-weight: 400;
+}
+.semi-button-primary.semi-button-solid {
+  background: #6b6b73;
+}
+.semi-button-primary.semi-button-solid:hover {
+  background: #3c3c43;
+}
+.spin {
+  animation: spin 1.2s linear infinite;
+}
+.muted {
+  color: #8e8e96;
+  font-size: 12px;
+}
+.live-dot {
+  width: 5px;
+  height: 5px;
+  background: #6b6b73;
+  border-radius: 50%;
+  flex-shrink: 0;
+  animation: pulse 1.2s infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 1;
+  }
+}

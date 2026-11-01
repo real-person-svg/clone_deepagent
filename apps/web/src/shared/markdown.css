@@ -1,0 +1,130 @@
+.markdown {
+  min-width: 0;
+  color: var(--agent-text);
+  font-size: 14px;
+  line-height: 1.75;
+  overflow-wrap: anywhere;
+}
+.markdown > :first-child {
+  margin-top: 0;
+}
+.markdown h1 {
+  margin: 20px 0 10px;
+  color: var(--agent-text);
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+.markdown h2 {
+  margin: 20px 0 10px;
+  color: var(--agent-text);
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+.markdown h3 {
+  margin: 20px 0 10px;
+  color: var(--agent-text);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+.markdown p {
+  margin: 0 0 12px;
+}
+.markdown ul,
+.markdown ol {
+  padding-left: 22px;
+  margin: 0 0 14px;
+}
+.markdown li {
+  margin: 5px 0;
+}
+.markdown blockquote {
+  margin: 12px 0;
+  padding: 0 0 0 12px;
+  border: 0;
+  border-left: 2px solid var(--agent-border);
+  border-radius: 0;
+  background: transparent;
+  color: var(--agent-muted);
+  font-size: 14px;
+}
+.markdown blockquote p {
+  margin: 0;
+}
+.table-scroll {
+  max-width: 100%;
+  overflow: auto;
+  margin: 15px 0;
+  scrollbar-width: thin;
+}
+.markdown table {
+  width: 100%;
+  min-width: 500px;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.markdown th {
+  background: #f7f7f8;
+  color: var(--agent-text);
+  font-weight: 600;
+  text-align: left;
+}
+.markdown td,
+.markdown th {
+  border: 1px solid #d8d8de;
+  padding: 9px 10px;
+  vertical-align: top;
+  min-width: 75px;
+}
+.markdown th:last-child,
+.markdown td:last-child {
+  min-width: 170px;
+}
+.markdown code {
+  font-size: 12px;
+  background: #f5f5f7;
+  padding: 2px 4px;
+  border-radius: 3px;
+}
+.markdown pre {
+  white-space: pre;
+  overflow: auto;
+  background: #ffffff;
+  padding: 13px;
+  border-radius: 8px;
+  border: 1px solid #ebebef;
+}
+.markdown pre code {
+  background: none;
+  padding: 0;
+  overflow-wrap: normal;
+}
+.markdown hr {
+  border: 0;
+  border-top: 1px solid #ebebef;
+  margin: 24px 0;
+}
+.markdown strong {
+  font-weight: 550;
+}
+.evidence-link {
+  display: inline;
+  padding: 0;
+  border: 0;
+  border-radius: 2px;
+  background: transparent;
+  color: var(--agent-text);
+  font: inherit;
+  text-align: inherit;
+  text-decoration: underline;
+  text-decoration-color: var(--agent-border-strong);
+  text-underline-offset: 3px;
+  overflow-wrap: anywhere;
+}
+.evidence-link:hover {
+  background: transparent;
+  color: var(--agent-title);
+  text-decoration-color: currentColor;
+}

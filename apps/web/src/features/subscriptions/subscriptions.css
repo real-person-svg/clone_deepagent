@@ -1,0 +1,115 @@
+.subscription-guide {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 20px;
+  border: 1px solid #d8d8de;
+  border-radius: 9px;
+  background: #ffffff;
+  margin-bottom: 27px;
+}
+.guide-icon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  color: #8e8e96;
+  background: #ebebef;
+  border: 1px solid #d8d8de;
+  border-radius: 10px;
+}
+.subscription-guide > div {
+  flex: 1;
+}
+.subscription-guide strong {
+  font-size: 12px;
+  color: #6b6b73;
+  font-weight: 500;
+}
+.subscription-guide p {
+  font-size: 12px;
+  color: #8e8e96;
+  line-height: 1.9;
+  margin: 6px 0 0;
+}
+.subscription-guide > .dataset-label {
+  color: #8e8e96;
+}
+.subscription-list {
+  display: grid;
+  gap: 16px;
+}
+.subscription-card {
+  border: 1px solid #d8d8de;
+  border-radius: 10px;
+  padding: 20px 22px;
+}
+.subscription-card-heading {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 13px;
+}
+.subscription-card-heading h2 {
+  font-size: 14px;
+  font-weight: 500;
+  color: #6b6b73;
+  margin: 0;
+}
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #b2b2b6;
+  display: inline-block;
+  flex-shrink: 0;
+}
+.status-dot.on {
+  background: #8e8e96;
+}
+.subtle-tag {
+  font-size: 12px;
+  background: #f5f5f7;
+  color: #8e8e96;
+  padding: 3px 5px;
+  border-radius: 4px;
+  margin-left: auto;
+}
+.subscription-card > p {
+  font-size: 12px;
+  color: #8e8e96;
+  line-height: 1.9;
+  margin: 0 0 16px;
+}
+.subscription-facts {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  font-size: 12px;
+  color: #8e8e96;
+  margin-bottom: 21px;
+}
+.subscription-facts > span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.subscription-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid #ebebef;
+  padding-top: 12px;
+  gap: 12px;
+}
+.subscription-card-footer > span {
+  font-size: 12px;
+  color: #8e8e96;
+}
+.subscription-card-footer > div {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}

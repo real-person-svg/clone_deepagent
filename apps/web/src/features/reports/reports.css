@@ -1,0 +1,79 @@
+.report-list {
+  border: 1px solid #d8d8de;
+  border-radius: 10px;
+  overflow: hidden;
+}
+.report-list-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  width: 100%;
+  text-align: left;
+  border-bottom: 1px solid #ebebef;
+}
+.report-list-item:last-child {
+  border: 0;
+}
+.report-list-item:hover {
+  background: #ffffff;
+}
+.report-list-item > div {
+  min-width: 0;
+  flex: 1;
+}
+.report-list-item h2 {
+  font-size: 13px;
+  font-weight: 500;
+  color: #6b6b73;
+  margin: 0 0 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.report-list-item p {
+  font-size: 12px;
+  color: #8e8e96;
+  margin: 0;
+}
+.report-list-item > svg {
+  color: #8e8e96;
+}
+.document-icon {
+  display: grid;
+  place-items: center;
+  width: 39px;
+  height: 44px;
+  border-radius: 8px;
+  background: #f5f5f7;
+  color: #8e8e96;
+  flex-shrink: 0;
+}
+.report-detail {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+.report-toolbar {
+  position: sticky;
+  top: 0;
+  background: #ffffffef;
+  z-index: 1;
+  border-bottom: 1px solid #ebebef;
+  padding: 13px 28px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.report-toolbar > div {
+  display: flex;
+  gap: 15px;
+}
+.report-document {
+  max-width: 960px;
+  margin: auto;
+  padding: 35px 35px 60px;
+}
+.report-document > .eyebrow {
+  margin-bottom: 25px;
+}

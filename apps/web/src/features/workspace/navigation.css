@@ -1,0 +1,17 @@
+/* App-local equivalents of the original Agent selector, header and welcome state. */
+.navigation-heading {
+  padding: 0 10px 8px;
+  color: #8c8c8c;
+  font-size: 13px;
+  line-height: 20px;
+}
+.new-chat[aria-current='page'],
+.new-chat[aria-current='page']:hover {
+  background: #e8e8e8;
+  color: #262626;
+}
+.sidebar-collapsed .new-chat,
+.sidebar-collapsed .main-navigation,
+.sidebar-collapsed .sidebar-footer {
+  display: none;
+}

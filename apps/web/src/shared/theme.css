@@ -1,0 +1,161 @@
+.management-heading .eyebrow {
+  display: none;
+}
+.management-page > * {
+  max-width: 1040px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.trace-summary:hover {
+  background: var(--agent-hover);
+  color: var(--agent-text);
+}
+.agent-step {
+  color: var(--agent-secondary);
+  font-size: 13px;
+  line-height: 22px;
+}
+.agent-step small,
+.tool-row small {
+  color: var(--agent-muted);
+  font-size: 12px;
+}
+.tiny-agent,
+.mode-icon,
+.mode-icon.multi {
+  color: #16ad66;
+}
+.live-dot,
+.status-dot.on,
+.workspace-button i,
+.subtle-badge i {
+  background: var(--agent-success);
+}
+.bad,
+.trace-error .trace-summary {
+  color: var(--agent-red);
+}
+.markdown td,
+.markdown th {
+  padding: 8px 12px;
+  border-color: var(--agent-border);
+}
+.markdown strong {
+  font-weight: 600;
+}
+.markdown code {
+  background: #f1f1f2;
+  color: #454549;
+  font-family: var(--agent-mono);
+}
+.markdown pre,
+.source-text {
+  border-color: var(--agent-border);
+  background: #f7f7f8;
+  color: var(--agent-text);
+}
+.agent-mark {
+  border: 0;
+  background: var(--agent-field);
+  color: var(--agent-title);
+}
+.management-heading .semi-button {
+  height: 36px;
+  padding: 0 16px;
+  border-radius: 10px;
+  background: var(--agent-ink);
+  font-size: 14px;
+}
+.app-shell .semi-button-primary.semi-button-solid,
+.semi-modal .semi-button-primary.semi-button-solid {
+  background: var(--agent-ink);
+}
+.app-shell .semi-button-primary.semi-button-solid:hover,
+.semi-modal .semi-button-primary.semi-button-solid:hover {
+  background: var(--agent-ink-hover);
+}
+.info-strip {
+  border-color: var(--agent-border);
+  background: #fff;
+  color: var(--agent-secondary);
+  font-size: 13px;
+}
+.source-item,
+.subscription-card,
+.template-card,
+.notification-item,
+.report-list {
+  border-color: var(--agent-border);
+  border-radius: 12px;
+  background: #fff;
+}
+.source-item h2,
+.subscription-card-heading h2,
+.template-card strong,
+.notification-title h2,
+.report-list-item h2 {
+  color: var(--agent-title);
+  font-size: 14px;
+  font-weight: 600;
+}
+.source-item p,
+.subscription-card > p,
+.template-card > p,
+.notification-body,
+.source-text {
+  color: var(--agent-secondary);
+  font-size: 13px;
+  line-height: 22px;
+}
+.subscription-guide {
+  border-color: var(--agent-border);
+  background: #fff;
+}
+.subscription-guide strong {
+  color: var(--agent-text);
+  font-size: 14px;
+}
+.subscription-guide p {
+  color: var(--agent-secondary);
+  font-size: 13px;
+}
+.guide-icon,
+.notification-symbol,
+.document-icon,
+.source-kind,
+.workspace-avatar {
+  border-color: var(--agent-border);
+  background: var(--agent-field);
+  color: var(--agent-secondary);
+}
+.version-tag,
+.subtle-tag,
+.tool-chips span {
+  border-color: var(--agent-border);
+  background: var(--agent-field);
+  color: var(--agent-secondary);
+  font-size: 11px;
+}
+.form-stack input,
+.form-stack textarea,
+.form-stack select {
+  color: var(--agent-text);
+  border-color: var(--agent-border-strong);
+  font-size: 14px;
+}
+.form-stack label,
+.caption,
+.drawer-content dl,
+.source-label {
+  color: var(--agent-secondary);
+}
+.drawer-content h2 {
+  color: var(--agent-title);
+}
+.drawer-header,
+.evidence-drawer {
+  border-color: var(--agent-border);
+}
+.drawer-header > span {
+  color: var(--agent-text);
+}

@@ -1,0 +1,70 @@
+.notification-list {
+  display: grid;
+  gap: 15px;
+}
+.notification-item {
+  display: flex;
+  gap: 15px;
+  border: 1px solid #d8d8de;
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 22px;
+}
+.notification-item.read {
+  background: #fff;
+  border-color: #ebebef;
+}
+.notification-symbol {
+  color: #8e8e96;
+  background: #ebebef;
+  border-radius: 9px;
+  display: grid;
+  place-items: center;
+  width: 35px;
+  height: 35px;
+  flex-shrink: 0;
+}
+.notification-item > div {
+  min-width: 0;
+  flex: 1;
+}
+.notification-title {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.notification-title h2 {
+  font-size: 13px;
+  font-weight: 500;
+  color: #6b6b73;
+  margin: 0 0 14px;
+}
+.unread-dot {
+  width: 5px;
+  height: 5px;
+  background: #6b6b73;
+  border-radius: 50%;
+  margin-top: -12px;
+}
+.notification-body {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: 12px;
+  color: #8e8e96;
+  line-height: 1.9;
+  margin: 0 0 14px;
+}
+.notification-footer {
+  display: flex;
+  gap: 17px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.notification-footer > span {
+  font-size: 12px;
+  color: #8e8e96;
+}
+.notification-footer .text-button {
+  color: #8e8e96;
+  font-size: 12px;
+}

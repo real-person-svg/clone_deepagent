@@ -1,0 +1,54 @@
+.management-page {
+  min-height: 0;
+  flex: 1;
+  overflow: auto;
+  padding: 40px 32px 56px;
+  background: var(--agent-canvas);
+  color: var(--agent-text);
+  scrollbar-width: thin;
+}
+.management-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 28px;
+}
+.management-heading .eyebrow {
+  margin-bottom: 10px;
+}
+.management-heading h1 {
+  margin: 0 0 4px;
+  color: var(--agent-title);
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 32px;
+}
+.management-heading p {
+  margin: 0;
+  color: var(--agent-secondary);
+  font-size: 14px;
+  line-height: 22px;
+}
+.management-heading .semi-button {
+  font-size: 12px;
+  background: #6b6b73;
+  border-radius: 7px;
+  height: 34px;
+}
+.info-strip {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  padding: 12px 15px;
+  border: 1px solid #ebebef;
+  border-radius: 8px;
+  background: #ffffff;
+  font-size: 12px;
+  line-height: 1.8;
+  color: #8e8e96;
+  margin-bottom: 25px;
+}
+.info-strip svg {
+  margin-top: 2px;
+}
