@@ -30,7 +30,7 @@ export function conversationContext(store: Store, run: Run, goal: string): Model
   }
   messages.push({
     role: 'user',
-    content: `${goal}\n\n本轮研究上下文：${run.provider === 'demo' ? '离线虚构资料' : '真实模型，仅可使用已导入或新采集来源'}；快照 ${run.dataset}。用户原始请求：${run.prompt}`,
+    content: `${goal}\n\n本轮研究上下文：真实模型，仅可使用已导入或新采集来源。用户原始请求：${run.prompt}`,
   });
 
   return messages;

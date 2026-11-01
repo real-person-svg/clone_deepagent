@@ -3,6 +3,7 @@
   flex: 1;
 }
 .header-settings {
+  margin-left: auto;
   color: var(--agent-secondary);
 }
 .agent-selector {
@@ -134,4 +135,48 @@
 }
 .empty-icon {
   color: #16ad66;
+}
+
+.composer .agent-selector {
+  position: static;
+}
+.composer .agent-switcher.compact {
+  min-height: 32px;
+  max-width: none;
+  gap: 6px;
+  padding: 4px 6px;
+  border-radius: 6px;
+  background: transparent;
+}
+.composer .agent-switcher.compact:hover:not(:disabled) {
+  background: var(--agent-hover);
+}
+.composer .agent-switcher.compact .switcher-avatar {
+  width: 20px;
+  height: 20px;
+  flex-basis: 20px;
+  background: transparent;
+  color: var(--green);
+}
+.composer .agent-switcher.compact strong {
+  font-weight: 400;
+}
+.composer .agent-selector.is-compact .agent-menu {
+  top: auto;
+  right: auto;
+  bottom: calc(100% + 8px);
+  left: 0;
+  width: min(360px, 100%);
+  max-height: min(320px, 50dvh);
+  overflow-y: auto;
+}
+
+.agent-menu-error {
+  padding: 10px;
+  color: var(--agent-muted);
+  font-size: 12px;
+}
+.agent-menu-error button {
+  margin-left: 8px;
+  text-decoration: underline;
 }

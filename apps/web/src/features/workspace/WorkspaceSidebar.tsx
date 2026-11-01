@@ -164,10 +164,6 @@ export function WorkspaceSidebar({ workspace }: { workspace: ReturnType<typeof u
             <>
               <span>
                 <strong>本地工作空间</strong>
-                <small>
-                  <i />
-                  SQLite 持久化
-                </small>
               </span>
               <Settings2 size={15} />
             </>

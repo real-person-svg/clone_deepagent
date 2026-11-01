@@ -20,14 +20,11 @@
   color: var(--agent-muted);
   font-size: 12px;
 }
-.tiny-agent,
-.mode-icon,
-.mode-icon.multi {
+.tiny-agent {
   color: #16ad66;
 }
 .live-dot,
 .status-dot.on,
-.workspace-button i,
 .subtle-badge i {
   background: var(--agent-success);
 }

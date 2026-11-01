@@ -70,25 +70,18 @@ export function useEvidenceDrawer(id: string | null, onClose: () => void) {
 
   const handleDrawerClick = (event: MouseEvent<HTMLElement>) => event.stopPropagation();
   let kindLabel = '网页快照';
-  let datasetLabel = '独立来源';
-  if (evidence?.kind === 'fixture') kindLabel = '虚构测试资料';
-  else if (evidence?.kind === 'upload') kindLabel = '用户上传资料';
-  if (evidence?.dataset === 'baseline') datasetLabel = '基准期';
-  else if (evidence?.dataset === 'updated') datasetLabel = '变化期';
+  if (evidence?.kind === 'upload') kindLabel = '用户上传资料';
   const observedAt = evidence ? localTime(evidence.observedAt, true) : '';
   const hashPreview = evidence?.hash.slice(0, 20);
   const hasSourceUrl = Boolean(evidence?.url);
-  const isExampleSource = evidence?.kind === 'fixture';
 
   return {
     hasSourceUrl,
-    isExampleSource,
     evidence,
     error,
     closeRef,
     handleDrawerClick,
     kindLabel,
-    datasetLabel,
     observedAt,
     hashPreview,
   };

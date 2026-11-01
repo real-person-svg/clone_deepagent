@@ -1,4 +1,5 @@
 import type { Run } from '../contracts/index';
+import { refreshSubscriptionSources } from '../research/subscriptions/refresh';
 import { Tools } from '../research/tools';
 import { Store, now, uid } from '../storage/index';
 import { AgentRunner } from './execution/agent-runner';
@@ -27,7 +28,7 @@ export class Runtime {
   constructor(
     public store: Store,
     private live?: LiveModelConfig,
-    private adapters?: Partial<Record<'demo' | 'live', ModelAdapter>>
+    private adapters?: Partial<Record<'live', ModelAdapter>>
   ) {
     this.tools = new Tools(store);
     this.agentRunner = new AgentRunner(store, this.tools, live, adapters);
@@ -126,10 +127,15 @@ export class Runtime {
         this.store.exec("UPDATE messages SET status='running' WHERE id=?", `assistant_${id}`);
         this.store.event(id, 'run.started', 'root', {
           message: r.mode === 'multi' ? '构建研究计划与协作任务' : '构建上下文并开始 ReAct',
-          version: r.snapshot.root.version,
+          version: r.snapshot[r.agentId].version,
+          agentId: r.agentId,
         });
       });
-      const result = await this.agentRunner.run(r, 'root', 'root', r.prompt, owner, signal);
+      const checks = await refreshSubscriptionSources(this.store, this.tools, r, signal);
+      const goal = checks.length
+        ? `${r.prompt}\n本次实际采集结果：${JSON.stringify(checks)}。请通过 query_evidence 的 evidenceIds 读取前后原文，使用 compare_snapshots 比较。`
+        : r.prompt;
+      const result = await this.agentRunner.run(r, 'root', r.agentId, goal, owner, signal);
       assertRunOwner(this.store, id, owner, signal);
       publishReport(this.store, r, result);
       this.onComplete?.(this.store.run(id));
@@ -149,7 +155,7 @@ export class Runtime {
           saved?.final ||
           this.store
             .events(id)
-            .filter((e) => e.type === 'message.delta' && e.agent === 'root')
+            .filter((e) => e.type === 'message.delta' && e.data.taskKey === 'root')
             .map((e) => e.data.text || '')
             .join('');
         this.store.finish(
@@ -158,6 +164,7 @@ export class Runtime {
           `${partial}${partial ? '\n\n---\n\n' : ''}${reason}。已完成的工具记录保留，可在执行过程中查看。`,
           reason
         );
+        this.onComplete?.(this.store.run(id));
       }
     } finally {
       clearInterval(heartbeat);

@@ -1,4 +1,3 @@
-import { ChevronDown } from 'lucide-react';
 import { Agents } from '../agents/Agents';
 import { Chat } from '../chat/Chat';
 import { Notifications } from '../notifications/Notifications';
@@ -30,10 +29,7 @@ export function App() {
     shellClassName,
     handleOpenSettings,
     liveConfigured,
-    dataset,
     sectionLabel,
-    handleToggleDataset,
-    datasetLabel,
   } = workspace;
 
   return (
@@ -56,7 +52,6 @@ export function App() {
             refresh={refresh}
             onEvidence={setEvidenceId}
             liveConfigured={liveConfigured}
-            dataset={dataset}
           />
         )}
         {!isChatPage && (
@@ -66,28 +61,16 @@ export function App() {
                 研究空间<span>/</span>
                 {sectionLabel}
               </span>
-              <button
-                className="dataset-switch"
-                title="切换虚构资料快照以验证变化"
-                onClick={handleToggleDataset}
-              >
-                <span className="status-dot on" />
-                {datasetLabel}
-                <ChevronDown size={12} />
-              </button>
+              <span className="subtle-tag">真实来源研究</span>
             </header>
 
             {isAgentsPage && <Agents onRefresh={refresh} />}
-            {isSourcesPage && <Sources dataset={dataset} onEvidence={setEvidenceId} />}
+            {isSourcesPage && <Sources onEvidence={setEvidenceId} />}
             {isReportsPage && (
               <Reports onEvidence={setEvidenceId} onConversation={openConversation} />
             )}
             {isSubscriptionsPage && (
-              <SubscriptionPanel
-                dataset={dataset}
-                onConversation={openConversation}
-                refresh={refresh}
-              />
+              <SubscriptionPanel onConversation={openConversation} refresh={refresh} />
             )}
             {isNotificationsPage && (
               <Notifications

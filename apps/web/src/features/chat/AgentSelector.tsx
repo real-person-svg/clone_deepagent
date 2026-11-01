@@ -1,7 +1,7 @@
 import { Check, ChevronDown, MessageCircle } from 'lucide-react';
 import { useAgentSelector } from './useAgentSelector';
 export function AgentSelector(props: Parameters<typeof useAgentSelector>[0]) {
-  const { mode, disabled, compact } = props;
+  const { agentId, disabled, compact } = props;
   const {
     open,
     triggerRef,
@@ -15,6 +15,8 @@ export function AgentSelector(props: Parameters<typeof useAgentSelector>[0]) {
     handleClose,
     handleMenuKeyDown,
     optionViews,
+    error,
+    reload,
   } = useAgentSelector(props);
 
   return (
@@ -32,10 +34,12 @@ export function AgentSelector(props: Parameters<typeof useAgentSelector>[0]) {
           <MessageCircle size={avatarSize} />
         </span>
         <span className="switcher-body">
-          <strong>{selected.name}</strong>
-          {!compact && <span>{selected.description}</span>}
+          <strong>{selected?.name || '选择数字员工'}</strong>
+          {!compact && <span>{selected?.description}</span>}
         </span>
-        <span className="switcher-badge">{selected.badge}</span>
+        {!compact && (
+          <span className="switcher-badge">{selected ? `v${selected.version}` : ''}</span>
+        )}
         <ChevronDown size={14} />
       </button>
       {open && (
@@ -53,9 +57,16 @@ export function AgentSelector(props: Parameters<typeof useAgentSelector>[0]) {
             aria-label="选择研究 Agent"
             onKeyDown={handleMenuKeyDown}
           >
+            {error && (
+              <div className="agent-menu-error" role="alert">
+                加载数字员工失败：{error}
+                <button onClick={() => void reload()}>重试</button>
+              </div>
+            )}
+            {!error && !optionViews.length && <p className="agent-menu-error">正在加载数字员工…</p>}
             {optionViews.map(({ option, checked, handleSelect }) => (
               <button
-                key={option.mode}
+                key={option.id}
                 role="menuitemradio"
                 aria-checked={checked}
                 onClick={handleSelect}
@@ -67,7 +78,7 @@ export function AgentSelector(props: Parameters<typeof useAgentSelector>[0]) {
                   <strong>{option.name}</strong>
                   <span>{option.description}</span>
                 </span>
-                {mode === option.mode && <Check size={15} />}
+                {agentId === option.id && <Check size={15} />}
               </button>
             ))}
           </div>

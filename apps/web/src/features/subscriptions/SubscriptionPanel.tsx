@@ -7,7 +7,7 @@ import { TaskTemplateLibrary } from './TaskTemplateLibrary';
 import { useSubscriptionPanel } from './useSubscriptionPanel';
 export function SubscriptionPanel(props: Parameters<typeof useSubscriptionPanel>[0]) {
   const subscriptions = useSubscriptionPanel(props);
-  const { items, checking, handleOpenCreate, datasetLabel, subscriptionCards } = subscriptions;
+  const { items, checking, handleOpenCreate, subscriptionCards } = subscriptions;
 
   return (
     <section className="management-page">
@@ -26,13 +26,11 @@ export function SubscriptionPanel(props: Parameters<typeof useSubscriptionPanel>
           <Radio size={20} />
         </span>
         <div>
-          <strong>验证完整的变化监控链路</strong>
+          <strong>持续核对真实来源</strong>
           <p>
-            在基准快照创建订阅 → 切换到变化快照 → 立即检查 → 查看通知与证据。定时任务保存在
-            SQLite，服务运行时自动执行。
+            选择已采集的官方页面建立基线。服务运行时定期刷新页面并分析，保留前后证据；采集失败或研究不完整时保留旧基线。
           </p>
         </div>
-        <span className="dataset-label">{datasetLabel}</span>
       </div>
       <TaskTemplateLibrary subscriptions={subscriptions} />
       <div className="template-heading">
@@ -44,7 +42,7 @@ export function SubscriptionPanel(props: Parameters<typeof useSubscriptionPanel>
         <Empty
           icon={Radio}
           title="让 Agent 持续关注重要变化"
-          description="创建离线竞品巡检订阅，验证任务调度、去重、报告与站内通知。"
+          description="选择真实来源，定期检查内容更新并生成有证据的研究报告。"
         />
       )}
       {items.length > 0 && (
@@ -74,9 +72,9 @@ export function SubscriptionPanel(props: Parameters<typeof useSubscriptionPanel>
                     <Clock3 size={13} />
                     {intervalLabel}
                   </span>
-                  <span>价格变化 &gt; {subscription.threshold}%</span>
-                  <span>授权变化即通知</span>
-                  <span>离线资料巡检 · 模板 v{templateVersion}</span>
+                  <span>{subscription.sourceIds.length} 个公开来源</span>
+                  <span>来源更新时通知</span>
+                  <span>真实来源巡检 · 模板 v{templateVersion}</span>
                 </div>
                 <div className="subscription-card-footer">
                   <span>{scheduleLabel}</span>

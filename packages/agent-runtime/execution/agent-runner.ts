@@ -2,7 +2,7 @@ import type { ModelMessage, ModelReply, Run } from '../../contracts/index';
 import { Tools } from '../../research/tools';
 import { Store, now, uid } from '../../storage/index';
 import { selectContext } from '../context';
-import { DemoModel, HttpModel, type LiveModelConfig, type ModelAdapter } from '../model';
+import { HttpModel, type LiveModelConfig, type ModelAdapter } from '../model';
 import { type Checkpoint } from './checkpoint';
 import { conversationContext } from './conversation-context';
 import { assertRunOwner } from './lease';
@@ -15,7 +15,7 @@ export class AgentRunner {
     private store: Store,
     private tools: Tools,
     private live?: LiveModelConfig,
-    private adapters?: Partial<Record<'demo' | 'live', ModelAdapter>>
+    private adapters?: Partial<Record<'live', ModelAdapter>>
   ) {}
   private assertOwner(id: string, owner: string, signal: AbortSignal) {
     assertRunOwner(this.store, id, owner, signal);
@@ -70,16 +70,19 @@ export class AgentRunner {
         taskKey,
         goal,
         version: agent.version,
+        agentName: agent.name,
         restored: Boolean(saved),
       });
       this.store.saveCheckpoint(run.id, taskKey, state);
     });
+    const pinnedTask = state.messages.findLast(
+      (m) => m.role === 'user' && m.content?.includes('本轮研究上下文：')
+    );
     const allowed = agent.tools.filter(
-      (n) => n !== 'delegate_tasks' || (agentId === 'root' && run.mode === 'multi')
+      (n) => n !== 'delegate_tasks' || (taskKey === 'root' && run.mode === 'multi')
     );
     let adapter = this.adapters?.[run.provider];
-    if (!adapter && run.provider === 'demo') adapter = new DemoModel();
-    else if (!adapter && this.live) adapter = new HttpModel(this.live);
+    if (!adapter && this.live) adapter = new HttpModel(this.live);
     if (!adapter) throw new Error('真实模型尚未配置，请在服务端设置 MODEL_BASE_URL 和 MODEL_NAME');
     try {
       while (state.step < agent.maxSteps) {
@@ -127,7 +130,7 @@ export class AgentRunner {
         const flushText = () => {
           if (!pendingText) return;
           this.assertOwner(run.id, owner, signal);
-          this.store.event(run.id, agentId === 'root' ? 'message.delta' : 'agent.delta', agentId, {
+          this.store.event(run.id, taskKey === 'root' ? 'message.delta' : 'agent.delta', agentId, {
             taskKey,
             step: state.step + 1,
             text: pendingText,
@@ -135,14 +138,12 @@ export class AgentRunner {
           pendingText = '';
           lastFlush = Date.now();
         };
-        const context =
-          run.provider === 'live'
-            ? selectContext(state.messages)
-            : { messages: state.messages, compacted: false, originalCharacters: 0 };
+        const context = selectContext(state.messages, 75000, pinnedTask);
         if (context.compacted)
           this.store.event(run.id, 'context.compacted', agentId, {
             taskKey,
             originalCharacters: context.originalCharacters,
+            selectedCharacters: JSON.stringify(context.messages).length,
             message: '已选择近期完整工具调用对，旧记录仍可查询',
           });
         const reply: ModelReply = await this.modelSlots.use(signal, () =>
@@ -150,7 +151,6 @@ export class AgentRunner {
             agent,
             messages: context.messages,
             tools: this.tools.definitions(allowed),
-            dataset: run.dataset,
             signal,
             onText: (delta) => {
               this.assertOwner(run.id, owner, signal);
@@ -184,8 +184,14 @@ export class AgentRunner {
         } else {
           const content = reply.content || text;
           if (!content.trim()) throw new Error('模型没有返回可用回答');
-          if (run.provider === 'live' && agentId === 'root') {
-            const eligible = new Set(this.store.evidence(run.dataset, 'live').map((e) => e.id));
+          if (taskKey === 'root') {
+            const eligible = new Set(
+              this.store
+                .all<{
+                  evidenceId: string;
+                }>('SELECT evidenceId FROM run_evidence WHERE runId=?', run.id)
+                .map((e) => e.evidenceId)
+            );
             const invalid = [...content.matchAll(/\]\(\/evidence\/([\w-]+)\)/g)]
               .map((match) => match[1])
               .filter((id) => !eligible.has(id));
@@ -271,7 +277,7 @@ export class AgentRunner {
           this.childSlots.use(signal, async () => {
             const previous = this.store
               .all<{ agent: string; result: string }>(
-                "SELECT agent,result FROM tasks WHERE runId=? AND status='completed' AND agent!='root' ORDER BY createdAt",
+                "SELECT agent,result FROM tasks WHERE runId=? AND status='completed' AND taskKey!='root' ORDER BY createdAt",
                 run.id
               )
               .map((r) => `${r.agent}: ${r.result.slice(0, 7000)}`)

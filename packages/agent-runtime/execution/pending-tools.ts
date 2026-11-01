@@ -72,10 +72,9 @@ export async function executePendingTools({
             taskKey,
             conversationId: run.conversationId,
             provider: run.provider,
-            dataset: run.dataset,
             signal,
             delegate:
-              agentId === 'root' && run.mode === 'multi'
+              taskKey === 'root' && run.mode === 'multi'
                 ? (tasks) => delegate(tasks, toolCall.id)
                 : undefined,
           },

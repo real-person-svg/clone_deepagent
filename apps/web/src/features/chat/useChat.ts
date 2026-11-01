@@ -14,7 +14,6 @@ export function useChat({
   refresh,
   onEvidence,
   liveConfigured,
-  dataset,
   onSettings,
 }: {
   conversationId: string | null;
@@ -23,17 +22,15 @@ export function useChat({
   refresh: () => void;
   onEvidence: (id: string) => void;
   liveConfigured: boolean;
-  dataset: string;
+
   onSettings: () => void;
 }) {
   const {
     detail,
     input,
     setInput,
-    mode,
-    setMode,
-    provider,
-    setProvider,
+    agentId,
+    setAgentId,
     events,
     loading,
     error,
@@ -46,7 +43,6 @@ export function useChat({
     fetchDetail,
   } = useConversationSession(conversationId, refresh);
   const [busy, setBusy] = useState(false);
-  const [menu, setMenu] = useState(false);
   const textarea = useRef<HTMLTextAreaElement>(null);
   const fileInput = useRef<HTMLInputElement>(null);
 
@@ -57,8 +53,8 @@ export function useChat({
     }
   }, [input]);
 
-  const submit = async (prompt = input, pickedMode = mode) => {
-    if (!prompt.trim() || active || busy) return;
+  const submit = async (prompt = input) => {
+    if (!prompt.trim() || active || busy || !liveConfigured) return;
     setBusy(true);
     setError('');
     try {
@@ -75,8 +71,8 @@ export function useChat({
       const request: Record<string, unknown> = {};
       if (conversationId) request.conversationId = conversationId;
       request.prompt = actual;
-      request.mode = pickedMode;
-      request.provider = provider;
+      request.agentId = agentId;
+      request.provider = 'live';
 
       const run = await api<Run>('/runs', 'POST', request);
       setInput('');
@@ -113,8 +109,7 @@ export function useChat({
   const showConversation = !loading && messages.length > 0;
   const showWelcome = !loading && !messages.length;
   const chatTitle = conversationTitle || detail?.title || 'Agent 对话';
-  const selectorCompact = Boolean(detail);
-  const selectorDisabled = Boolean(active) || busy;
+  const selectorDisabled = Boolean(active) || busy || loading;
 
   const handleScroll = () => {
     const v = viewport.current!;
@@ -124,7 +119,6 @@ export function useChat({
   const suggestions = prompts.map((p) => {
     const handleSelectPrompt = () => {
       setInput(p.text);
-      setMode(p.mode);
       textarea.current?.focus();
     };
 
@@ -157,44 +151,16 @@ export function useChat({
     e.target.value = '';
   };
 
-  const handleToggleMode = () => setMode(mode === 'single' ? 'multi' : 'single');
-
-  const composerModeLabel = mode === 'multi' ? '多 Agent' : '单 Agent';
-
-  const handleToggleProviderMenu = () => setMenu(!menu);
-
-  const composerProviderLabel = provider === 'demo' ? '离线演示' : '真实模型';
-
-  const handleCloseProviderMenu = () => setMenu(false);
-
-  const handleSelectDemo = () => {
-    setProvider('demo');
-    setMenu(false);
-  };
-
-  const liveProviderDisabled = !liveConfigured;
-
-  const handleSelectLive = () => {
-    setProvider('live');
-    setMenu(false);
-  };
-
-  const liveProviderDescription = liveConfigured
-    ? '使用服务端模型和已导入来源'
-    : '请在服务端 .env 配置模型';
-
+  const composerProviderLabel = liveConfigured ? '真实模型' : '模型未配置';
   const handleCancelRun = async () => {
     if (!active) return;
     await api(`/runs/${active.id}/cancel`, 'POST');
     await fetchDetail(conversationId!);
   };
 
-  const sendDisabled = !input.trim() || busy;
+  const sendDisabled = !input.trim() || busy || !liveConfigured;
 
   const handleSend = () => void submit();
-
-  const providerCaption =
-    provider === 'demo' ? '离线演示使用虚构竞品资料' : '结论请结合来源原文核对';
 
   return {
     showLoading,
@@ -202,14 +168,12 @@ export function useChat({
     showWelcome,
     detail,
     input,
-    mode,
-    setMode,
-    provider,
+    agentId,
+    setAgentId,
     events,
     busy,
     loading,
     error,
-    menu,
     attachment,
     viewport,
     textarea,
@@ -217,7 +181,6 @@ export function useChat({
     active,
     messages,
     chatTitle,
-    selectorCompact,
     selectorDisabled,
     handleScroll,
     turns,
@@ -230,18 +193,9 @@ export function useChat({
     handleChooseFile,
     isRunning,
     handleFileChange,
-    handleToggleMode,
-    composerModeLabel,
-    handleToggleProviderMenu,
     composerProviderLabel,
-    handleCloseProviderMenu,
-    handleSelectDemo,
-    liveProviderDisabled,
-    handleSelectLive,
-    liveProviderDescription,
     handleCancelRun,
     sendDisabled,
     handleSend,
-    providerCaption,
   };
 }

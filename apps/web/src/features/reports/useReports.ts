@@ -23,7 +23,6 @@ export function useReports(onConversation: (id: string) => void) {
     report,
     handleSelect: () => setSelected(report),
     observedAt: localTime(report.createdAt, true),
-    datasetLabel: report.dataset === 'baseline' ? '基准快照' : '变化快照',
   }));
   const exportUrl = selected ? `/api/reports/${selected.id}/export` : '';
   const selectedTime = selected ? localTime(selected.createdAt, true) : '';

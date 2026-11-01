@@ -1,17 +1,15 @@
 import Toast from '@douyinfe/semi-ui/lib/es/toast';
 import type { ChangeEvent } from 'react';
 import { useEffect, useState } from 'react';
-import type { Run, Subscription } from '../../../../../packages/contracts/index';
+import type { Evidence, Run, Subscription } from '../../../../../packages/contracts/index';
 import { api } from '../../shared/api';
 import { localTime } from '../../shared/format';
 
 import { useTaskTemplates } from './useTaskTemplates';
 export function useSubscriptionPanel({
-  dataset,
   onConversation,
   refresh,
 }: {
-  dataset: string;
   onConversation: (id: string) => void;
   refresh: () => void;
 }) {
@@ -19,10 +17,11 @@ export function useSubscriptionPanel({
     [open, setOpen] = useState(false),
     [name, setName] = useState('AI 竞品商业化巡检'),
     [prompt, setPrompt] = useState(
-      '对比 Alpha、Beta、Gamma 的价格、套餐权益和商用授权变化，提供前后证据。'
+      '刷新选定的官方来源，核对价格、套餐权益和商用授权的变化，提供前后原文证据。'
     ),
     [interval, setIntervalValue] = useState(1440),
-    [threshold, setThreshold] = useState(10),
+    [sourceIds, setSourceIds] = useState<string[]>([]),
+    [sources, setSources] = useState<Evidence[]>([]),
     [busy, setBusy] = useState(false),
     [checking, setChecking] = useState('');
 
@@ -56,6 +55,20 @@ export function useSubscriptionPanel({
   useEffect(() => {
     void load();
     void loadTemplates();
+    api<Evidence[]>('/evidence')
+      .then((items) => {
+        const seen = new Set<string>();
+        setSources(
+          items.filter((s) => {
+            if (s.kind !== 'web') return false;
+            const key = JSON.stringify([s.competitor, s.url]);
+            if (seen.has(key)) return false;
+            seen.add(key);
+            return true;
+          })
+        );
+      })
+      .catch((e) => Toast.error(e.message));
     const timer = setInterval(() => void load(), 4000);
 
     return () => clearInterval(timer);
@@ -68,12 +81,12 @@ export function useSubscriptionPanel({
         name,
         prompt,
         intervalMinutes: interval,
-        threshold,
+        sourceIds,
         templateId,
       });
       setOpen(false);
       await load();
-      Toast.success('订阅已创建，当前快照作为变化基线');
+      Toast.success('订阅已创建，所选来源作为变化基线');
     } catch (e) {
       Toast.error((e as Error).message);
     } finally {
@@ -82,8 +95,6 @@ export function useSubscriptionPanel({
   };
 
   const handleOpenCreate = () => setOpen(true);
-
-  const datasetLabel = dataset === 'baseline' ? '当前：基准快照' : '当前：变化快照';
 
   const subscriptionCards = items.map((subscription) => {
     const statusClassName = `status-dot ${subscription.enabled ? 'on' : ''}`;
@@ -142,7 +153,8 @@ export function useSubscriptionPanel({
 
   const handleCloseCreate = () => setOpen(false);
 
-  const createDisabled = !name.trim() || !prompt.trim();
+  const createDisabled =
+    !name.trim() || !prompt.trim() || !sourceIds.length || sourceIds.length > 10;
 
   const handleCreateSubscription = () => void create();
 
@@ -153,10 +165,8 @@ export function useSubscriptionPanel({
   const handleIntervalChange = (e: ChangeEvent<HTMLSelectElement>) =>
     setIntervalValue(Number(e.target.value));
 
-  const handleThresholdChange = (e: ChangeEvent<HTMLInputElement>) =>
-    setThreshold(Number(e.target.value));
-
-  const baselineLabel = dataset === 'baseline' ? '基准' : '变化';
+  const handleSourceChange = (id: string, selected: boolean) =>
+    setSourceIds((ids) => (selected ? [...ids, id] : ids.filter((item) => item !== id)));
 
   return {
     items,
@@ -164,7 +174,9 @@ export function useSubscriptionPanel({
     name,
     prompt,
     interval,
-    threshold,
+    sources,
+    sourceIds,
+    handleSourceChange,
     busy,
     checking,
     templateId,
@@ -173,7 +185,6 @@ export function useSubscriptionPanel({
     templatePrompt,
     templateBusy,
     handleOpenCreate,
-    datasetLabel,
     handleNewTemplate,
     templateCards,
     subscriptionCards,
@@ -193,7 +204,5 @@ export function useSubscriptionPanel({
     handleNameChange,
     handlePromptChange,
     handleIntervalChange,
-    handleThresholdChange,
-    baselineLabel,
   };
 }

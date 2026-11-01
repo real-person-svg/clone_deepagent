@@ -7,19 +7,14 @@ export function createEvidenceTools(store: Store): Record<string, Spec> {
       description: '列出当前资料中的竞品、来源覆盖与数据性质。',
       schema: object({}),
       execute: (_args, c) => {
-        const evidence = store.evidence(c.dataset, c.provider);
+        const evidence = store.researchEvidence(c.runId);
 
         return {
-          synthetic: c.provider === 'demo',
-          dataset: c.dataset,
           competitors: [...new Set(evidence.map((e) => e.competitor))].map((name) => ({
             name,
             sourceCount: evidence.filter((e) => e.competitor === name).length,
           })),
-          note:
-            c.provider === 'demo'
-              ? 'Alpha/Beta/Gamma 均为虚构测试竞品，不代表真实市场。'
-              : '仅使用已导入资料和已采集网页；请补充官方来源。',
+          note: '仅使用已导入资料和已采集网页；请补充官方来源。',
         };
       },
     },
@@ -30,12 +25,20 @@ export function createEvidenceTools(store: Store): Record<string, Spec> {
         competitor: string,
         query: string,
         offset: { type: 'integer', minimum: 0, maximum: 200000 },
+        evidenceIds: { type: 'array', maxItems: 20, items: string },
       }),
       execute: (args, c) => {
         const query = String(args.query || ''),
           terms = evidenceTerms(query);
-        const found = store
-          .evidence(c.dataset, c.provider, String(args.competitor || ''))
+        const candidates = store.researchEvidence(c.runId, Boolean(args.evidenceIds));
+        const sources = args.evidenceIds
+          ? (args.evidenceIds as string[]).map((id) => {
+              const source = candidates.find((e) => e.id === id);
+              if (!source) throw new Error('证据不属于本次研究来源');
+              return source;
+            })
+          : candidates.filter((e) => e.competitor.includes(String(args.competitor || '')));
+        const found = sources
           .map((e) => ({
             e,
             score: terms.filter((term) =>

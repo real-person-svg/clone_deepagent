@@ -28,4 +28,17 @@ describe('真实价格的证据口径', () => {
       )
     ).toThrow('付款周期');
   });
+  it('拒绝将年付承诺中的月均值当作可月付价格', () => {
+    const sourceQuote = 'USD 25 per month, billed annually';
+    expect(() => validatePriceQuote({ ...plan, sourceQuote }, sourceQuote)).toThrow('年付承诺');
+  });
+  it('支持带千位分隔符的明确年度金额与英文付款周期', () => {
+    const sourceQuote = 'USD 1,200 per year';
+    expect(() =>
+      validatePriceQuote(
+        { ...plan, amount: '1200', billingPeriod: 'year', sourceQuote },
+        sourceQuote
+      )
+    ).not.toThrow();
+  });
 });

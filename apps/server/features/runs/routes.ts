@@ -1,4 +1,4 @@
-import type { AgentMode, Dataset, ProviderMode } from '../../../../packages/contracts/index';
+import type { AgentMode, ProviderMode } from '../../../../packages/contracts/index';
 import { terminalStatuses } from '../../../../packages/contracts/index';
 import { AppError } from '../../../../packages/storage/index';
 import type { AppContext } from '../../context';
@@ -12,10 +12,11 @@ export function registerRunsRoutes({ app, store, runtime, subscriptions, options
           {
             conversationId: text(200),
             prompt: text(),
+            agentId: text(200),
             mode: { enum: ['single', 'multi'] },
-            provider: { enum: ['demo', 'live'] },
+            provider: { enum: ['live'] },
           },
-          ['prompt', 'mode', 'provider']
+          ['prompt']
         ),
       },
     },
@@ -23,21 +24,25 @@ export function registerRunsRoutes({ app, store, runtime, subscriptions, options
       const p = request.body as {
         conversationId?: string;
         prompt: string;
-        mode: AgentMode;
-        provider: ProviderMode;
+        mode?: AgentMode;
+        agentId?: string;
+        provider?: ProviderMode;
       };
       if (!p.prompt.trim()) throw new AppError(400, '请输入研究问题');
-      if (p.provider === 'live' && !runtime.liveConfigured)
-        throw new AppError(400, '请先在服务端配置模型接口，或选择离线演示', 'MODEL_NOT_CONFIGURED');
-      const previous = p.conversationId ? store.detail(p.conversationId).runs.at(-1) : undefined;
-      const refreshSources = /最新|现在|刷新|更新|变化|当前快照/.test(p.prompt);
+      if (!runtime.liveConfigured)
+        throw new AppError(
+          400,
+          '请先在服务端配置 MODEL_BASE_URL 和 MODEL_NAME',
+          'MODEL_NOT_CONFIGURED'
+        );
+      const agent = store.agents().find((a) => a.id === (p.agentId || 'root'));
+      if (!agent) throw new AppError(404, '数字员工不存在或未发布', 'AGENT_NOT_FOUND');
       const run = store.createRun({
         ...p,
+        provider: 'live',
+        agentId: agent.id,
+        mode: p.mode || (agent.tools.includes('delegate_tasks') ? 'multi' : 'single'),
         prompt: p.prompt.trim(),
-        dataset:
-          previous && !refreshSources
-            ? previous.dataset
-            : (store.setting('dataset', 'baseline') as Dataset),
       });
       runtime.pump();
 

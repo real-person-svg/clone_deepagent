@@ -1,25 +1,46 @@
 import { afterEach, expect, it, vi } from 'vitest';
 import { createApp } from '../apps/server/app';
 import { HttpModel } from '../packages/agent-runtime/model';
-import { defaultAgents } from '../packages/research/fixtures';
+import { addSource, evidenceAdapter } from './support';
+import { defaultAgents } from '../packages/research/agents';
 
 const apps: Awaited<ReturnType<typeof createApp>>[] = [];
 afterEach(async () => {
   vi.restoreAllMocks();
   for (const a of apps.splice(0)) await a.app.close();
 });
-async function setup() {
-  const a = await createApp({ databasePath: ':memory:', startWorkers: false });
+async function setup(configured = false) {
+  if (configured)
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async (_url, init) => {
+      const req = JSON.parse(String(init?.body));
+      const result = await evidenceAdapter.complete({
+        ...req,
+        agent: defaultAgents[0],
+        signal: new AbortController().signal,
+        onText: () => {},
+      });
+      return new Response(
+        `data: ${JSON.stringify({ choices: [{ delta: { content: result.content, tool_calls: result.toolCalls.map((c, index) => ({ index, ...c })) } }], usage: { prompt_tokens: 10, completion_tokens: 10 } })}\n\ndata: [DONE]\n\n`
+      );
+    });
+  const a = await createApp({
+    live: configured
+      ? { baseUrl: 'https://model.example/v1', model: 'protocol-test', apiKey: '' }
+      : undefined,
+    databasePath: ':memory:',
+    startWorkers: false,
+  });
   apps.push(a);
   return a;
 }
 
 it('API 提交、历史查询、按序号回放 SSE、导出报告、重命名和删除闭环', async () => {
-  const { app, runtime } = await setup();
+  const { app, runtime, store } = await setup(true);
+  addSource(store);
   const response = await app.inject({
     method: 'POST',
     url: '/api/runs',
-    payload: { prompt: '比较 3 人团队价格', mode: 'single', provider: 'demo' },
+    payload: { prompt: '比较 3 人团队价格', mode: 'single', provider: 'live' },
   });
   expect(response.statusCode).toBe(200);
   const run = response.json();
@@ -33,7 +54,7 @@ it('API 提交、历史查询、按序号回放 SSE、导出报告、重命名�
   expect(ids.length).toBeGreaterThan(0);
   expect(Math.min(...ids)).toBe(5);
   expect(new Set(ids).size).toBe(ids.length);
-  expect((await app.inject(`/api/reports/report_${run.id}/export`)).body).toContain('684.00');
+  expect((await app.inject(`/api/reports/report_${run.id}/export`)).body).toContain('每年 USD 120');
   expect(
     (
       await app.inject({
@@ -56,7 +77,7 @@ it('参数、来源边界、未配置模型与未知证据引用受校验', asyn
       await app.inject({
         method: 'POST',
         url: '/api/runs',
-        payload: { prompt: 'x', mode: 'invalid', provider: 'demo' },
+        payload: { prompt: 'x', mode: 'invalid', provider: 'live' },
       })
     ).statusCode
   ).toBe(400);
@@ -92,45 +113,24 @@ it('参数、来源边界、未配置模型与未知证据引用受校验', asyn
   expect(upload.statusCode).toBe(200);
   expect(upload.json().kind).toBe('upload');
 });
-it('历史追问默认沿用前次快照，明确请求更新时才刷新来源', async () => {
-  const { app, runtime } = await setup();
-  const first = (
-    await app.inject({
-      method: 'POST',
-      url: '/api/runs',
-      payload: { prompt: '按3人比较套餐', mode: 'single', provider: 'demo' },
-    })
-  ).json();
-  await runtime.idle();
-  await app.inject({ method: 'PATCH', url: '/api/workspace', payload: { dataset: 'updated' } });
-  const follow = (
-    await app.inject({
-      method: 'POST',
-      url: '/api/runs',
-      payload: {
-        conversationId: first.conversationId,
-        prompt: '继续解释年付条件',
-        mode: 'single',
-        provider: 'demo',
-      },
-    })
-  ).json();
-  expect(follow.dataset).toBe('baseline');
-  await runtime.idle();
-  const refreshed = (
-    await app.inject({
-      method: 'POST',
-      url: '/api/runs',
-      payload: {
-        conversationId: first.conversationId,
-        prompt: '现在刷新资料，看看有什么变化',
-        mode: 'single',
-        provider: 'demo',
-      },
-    })
-  ).json();
-  expect(refreshed.dataset).toBe('updated');
-  await runtime.idle();
+it('新工作空间为空，拒绝已移除的演示模式与快照切换', async () => {
+  const { app, store } = await setup();
+  expect(store.evidence()).toEqual([]);
+  expect((await app.inject('/api/workspace')).json().liveConfigured).toBe(false);
+  expect(
+    (
+      await app.inject({
+        method: 'POST',
+        url: '/api/runs',
+        payload: { prompt: '研究', mode: 'single', provider: 'demo' },
+      })
+    ).statusCode
+  ).toBe(400);
+  expect(
+    (await app.inject({ method: 'PATCH', url: '/api/workspace', payload: { dataset: 'updated' } }))
+      .statusCode
+  ).toBe(404);
+  expect(store.conversations()).toHaveLength(0);
 });
 it('真实模型适配器拼接分片工具参数和文本，记录用量', async () => {
   const frames =
@@ -187,7 +187,7 @@ it('真实模型适配器拼接分片工具参数和文本，记录用量', asyn
     agent: defaultAgents[0],
     messages: [{ role: 'user', content: '研究问题' }],
     tools: [],
-    dataset: 'baseline',
+
     signal: new AbortController().signal,
     onText: (s) => (text += s),
   });
@@ -213,7 +213,7 @@ it('模型流中途断开不能被当作成功回答', async () => {
       agent: defaultAgents[0],
       messages: [{ role: 'user', content: '研究问题' }],
       tools: [],
-      dataset: 'baseline',
+
       signal: new AbortController().signal,
       onText: () => {},
     })

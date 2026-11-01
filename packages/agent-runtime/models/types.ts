@@ -1,15 +1,8 @@
-import type {
-  AgentSpec,
-  Dataset,
-  ModelMessage,
-  ModelReply,
-  ToolDefinition,
-} from '../../contracts/index';
+import type { AgentSpec, ModelMessage, ModelReply, ToolDefinition } from '../../contracts/index';
 export interface ModelRequest {
   agent: AgentSpec;
   messages: ModelMessage[];
   tools: ToolDefinition[];
-  dataset: Dataset;
   signal: AbortSignal;
   onText: (text: string) => void;
 }

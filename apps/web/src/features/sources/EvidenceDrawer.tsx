@@ -3,13 +3,11 @@ import { useEvidenceDrawer } from './useEvidenceDrawer';
 export function EvidenceDrawer({ id, onClose }: { id: string | null; onClose: () => void }) {
   const {
     hasSourceUrl,
-    isExampleSource,
     evidence,
     error,
     closeRef,
     handleDrawerClick,
     kindLabel,
-    datasetLabel,
     observedAt,
     hashPreview,
   } = useEvidenceDrawer(id, onClose);
@@ -49,12 +47,9 @@ export function EvidenceDrawer({ id, onClose }: { id: string | null; onClose: ()
             <dl>
               <dt>观察时间</dt>
               <dd>{observedAt}（北京时间）</dd>
-              <dt>快照</dt>
-              <dd>{datasetLabel}</dd>
               <dt>来源</dt>
               <dd>
-                {hasSourceUrl && isExampleSource && <span>{evidence.url}（示例域名）</span>}
-                {hasSourceUrl && !isExampleSource && (
+                {hasSourceUrl && (
                   <a href={evidence.url} target="_blank" rel="noopener noreferrer">
                     {evidence.url}
                     <ArrowUpRight size={12} />

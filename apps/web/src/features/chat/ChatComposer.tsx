@@ -1,26 +1,18 @@
-import {
-  ArrowUp,
-  Check,
-  ChevronDown,
-  FileText,
-  LoaderCircle,
-  MessageCircle,
-  Paperclip,
-  Square,
-  X,
-} from 'lucide-react';
+import { ArrowUp, FileText, LoaderCircle, Paperclip, Square, X } from 'lucide-react';
+import { AgentSelector } from './AgentSelector';
 import { useChat } from './useChat';
 export function ChatComposer({ chat }: { chat: ReturnType<typeof useChat> }) {
   const {
     input,
-    provider,
     busy,
     error,
-    menu,
     attachment,
     textarea,
     fileInput,
     active,
+    agentId,
+    setAgentId,
+    selectorDisabled,
     handleDismissError,
     handleRemoveAttachment,
     handleInputChange,
@@ -29,19 +21,10 @@ export function ChatComposer({ chat }: { chat: ReturnType<typeof useChat> }) {
     handleChooseFile,
     isRunning,
     handleFileChange,
-    handleToggleMode,
-    composerModeLabel,
-    handleToggleProviderMenu,
     composerProviderLabel,
-    handleCloseProviderMenu,
-    handleSelectDemo,
-    liveProviderDisabled,
-    handleSelectLive,
-    liveProviderDescription,
     handleCancelRun,
     sendDisabled,
     handleSend,
-    providerCaption,
   } = chat;
 
   return (
@@ -92,51 +75,18 @@ export function ChatComposer({ chat }: { chat: ReturnType<typeof useChat> }) {
               hidden
               onChange={handleFileChange}
             />
-            <button className="mode-toggle" onClick={handleToggleMode} disabled={isRunning}>
-              <MessageCircle className="mode-icon" size={15} />
-              {composerModeLabel}
-              <ChevronDown size={12} />
-            </button>
+            <AgentSelector
+              agentId={agentId}
+              compact
+              disabled={selectorDisabled}
+              onChange={setAgentId}
+            />
           </div>
           <div className="composer-right">
-            <div className="provider-control">
-              <button
-                className="provider-button"
-                aria-expanded={menu}
-                onClick={handleToggleProviderMenu}
-                disabled={isRunning}
-              >
-                <span className="provider-dot" />
-                {composerProviderLabel}
-                <ChevronDown size={12} />
-              </button>
-              {menu && (
-                <>
-                  <button
-                    className="menu-catcher"
-                    aria-label="关闭模型菜单"
-                    onClick={handleCloseProviderMenu}
-                  />
-                  <div className="provider-menu">
-                    <p>选择运行方式</p>
-                    <button onClick={handleSelectDemo}>
-                      <span>
-                        <strong>离线演示</strong>
-                        <small>虚构资料，验证工具与执行链路</small>
-                      </span>
-                      {provider === 'demo' && <Check size={15} />}
-                    </button>
-                    <button disabled={liveProviderDisabled} onClick={handleSelectLive}>
-                      <span>
-                        <strong>真实模型</strong>
-                        <small>{liveProviderDescription}</small>
-                      </span>
-                      {provider === 'live' && <Check size={15} />}
-                    </button>
-                  </div>
-                </>
-              )}
-            </div>
+            <span className="provider-button">
+              <span className="provider-dot" />
+              {composerProviderLabel}
+            </span>
 
             {active && (
               <button
@@ -161,10 +111,6 @@ export function ChatComposer({ chat }: { chat: ReturnType<typeof useChat> }) {
             )}
           </div>
         </div>
-      </div>
-      <div className="composer-caption">
-        <span>{providerCaption}</span>
-        <span>Enter 发送 · Shift + Enter 换行</span>
       </div>
     </div>
   );

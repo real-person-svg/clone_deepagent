@@ -33,9 +33,7 @@
   line-height: 1.9;
   margin: 6px 0 0;
 }
-.subscription-guide > .dataset-label {
-  color: #8e8e96;
-}
+
 .subscription-list {
   display: grid;
   gap: 16px;

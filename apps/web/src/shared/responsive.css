@@ -42,9 +42,7 @@
   .header-badges {
     gap: 8px;
   }
-  .header-badges > .dataset-label {
-    display: none;
-  }
+
   .management-page {
     padding: 30px 26px;
   }
@@ -68,9 +66,6 @@
   }
   .prompt-grid > button > p {
     margin-bottom: 13px;
-  }
-  .subscription-guide > .dataset-label {
-    display: none;
   }
 }
 @media (max-width: 720px) {
@@ -188,11 +183,7 @@
     line-height: 22px;
     min-height: 44px;
   }
-  .composer-caption {
-    font-size: 12px;
-    gap: 8px;
-    padding-top: 7px;
-  }
+
   .composer-toolbar {
     margin-top: 6px;
   }
@@ -204,11 +195,7 @@
     font-size: 12px;
     gap: 4px;
   }
-  .mode-toggle {
-    font-size: 12px;
-    gap: 3px;
-    padding: 4px;
-  }
+
   .composer-left > .icon-button {
     width: 23px;
   }
@@ -423,10 +410,6 @@
   }
   .drawer-content {
     padding: 25px 20px;
-  }
-  .provider-menu {
-    max-width: calc(100vw - 90px);
-    width: 260px;
   }
 }
 @media (hover: none) {

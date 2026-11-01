@@ -43,9 +43,15 @@ export function registerSubscriptionsRoutes({
             prompt: text(4000),
             templateId: text(200),
             intervalMinutes: { type: 'integer', minimum: 1, maximum: 43200 },
-            threshold: { type: 'number', minimum: 0, maximum: 1000 },
+            sourceIds: {
+              type: 'array',
+              minItems: 1,
+              maxItems: 10,
+              uniqueItems: true,
+              items: text(200),
+            },
           },
-          ['name', 'prompt', 'intervalMinutes', 'threshold']
+          ['name', 'prompt', 'intervalMinutes', 'sourceIds']
         ),
       },
     },
@@ -61,7 +67,6 @@ export function registerSubscriptionsRoutes({
           {
             enabled: { type: 'boolean' },
             name: text(100),
-            threshold: { type: 'number', minimum: 0, maximum: 1000 },
             intervalMinutes: { type: 'integer', minimum: 1, maximum: 43200 },
             revision: { type: 'integer', minimum: 1 },
           },

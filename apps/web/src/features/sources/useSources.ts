@@ -7,13 +7,7 @@ import { localTime } from '../../shared/format';
 
 import { sourceKindLabels } from './source.config';
 
-export function useSources({
-  dataset,
-  onEvidence,
-}: {
-  dataset: string;
-  onEvidence: (id: string) => void;
-}) {
+export function useSources({ onEvidence }: { onEvidence: (id: string) => void }) {
   const [sources, setSources] = useState<Evidence[]>([]),
     [filter, setFilter] = useState(''),
     [open, setOpen] = useState(false),
@@ -25,13 +19,13 @@ export function useSources({
     [busy, setBusy] = useState(false);
 
   const load = () =>
-    api<Evidence[]>(`/evidence?dataset=${dataset}`)
+    api<Evidence[]>('/evidence')
       .then(setSources)
       .catch((e) => Toast.error(e.message));
 
   useEffect(() => {
     void load();
-  }, [dataset]);
+  }, []);
 
   const save = async () => {
     if (!competitor.trim() || (tab === 'upload' ? !title.trim() || !content.trim() : !url.trim()))

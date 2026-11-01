@@ -46,14 +46,7 @@
   color: #8e8e96;
   white-space: nowrap;
 }
-.dataset-label {
-  font-size: 12px;
-  border: 1px solid #ebebef;
-  border-radius: 5px;
-  padding: 4px 7px;
-  color: #8e8e96;
-  white-space: nowrap;
-}
+
 .chat-viewport {
   flex: 1;
   min-height: 0;
@@ -186,6 +179,7 @@
   background: #fff;
 }
 .composer {
+  position: relative;
   width: 100%;
   min-height: 126px;
   padding: 14px 16px;
@@ -236,26 +230,7 @@
   gap: 3px;
   margin-left: 0;
 }
-.mode-toggle {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  padding: 4px 8px;
-  font-size: 14px;
-  color: #696970;
-  border-radius: 5px;
-}
-.mode-toggle:hover {
-  background: #f5f5f7;
-}
-.mode-icon {
-  font-size: 17px;
-  line-height: 1;
-  color: #8e8e96;
-}
-.mode-icon.multi {
-  color: #6b6b73;
-}
+
 .send-button {
   display: grid;
   width: 32px;
@@ -279,9 +254,7 @@
 .send-button.stop {
   background: #737378;
 }
-.provider-control {
-  position: relative;
-}
+
 .provider-button {
   display: flex;
   min-height: 32px;
@@ -295,72 +268,7 @@
 .provider-dot {
   display: none;
 }
-.provider-menu {
-  position: absolute;
-  right: 0;
-  bottom: 42px;
-  z-index: 11;
-  width: 320px;
-  max-width: calc(100vw - 32px);
-  max-height: min(360px, 50dvh);
-  overflow-y: auto;
-  padding: 6px;
-  border: 1px solid #e5e5e9;
-  border-radius: 14px;
-  background: #fff;
-  box-shadow: 0 6px 24px rgb(0 0 0 / 6%);
-}
-.provider-menu > p {
-  font-size: 12px;
-  color: #8e8e96;
-  margin: 7px 9px 6px;
-}
-.provider-menu > button {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  padding: 10px;
-  text-align: left;
-  border-radius: 8px;
-}
-.provider-menu > button:hover {
-  background: #f5f5f7;
-}
-.provider-menu strong {
-  display: block;
-  font-size: 14px;
-  font-weight: 400;
-  color: var(--agent-text);
-  margin-bottom: 4px;
-}
-.provider-menu small {
-  font-size: 12px;
-  line-height: 18px;
-  color: #8e8e96;
-}
-.provider-menu svg {
-  color: #16ad66;
-}
-.menu-catcher {
-  position: fixed;
-  inset: 0;
-  z-index: 10;
-  cursor: default;
-}
-.composer-caption {
-  position: absolute;
-  right: 34px;
-  bottom: 2px;
-  left: 34px;
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 0;
-  color: var(--agent-muted);
-  font-size: 12px;
-  line-height: 14px;
-}
+
 .attachment-chip {
   display: inline-flex;
   align-items: center;

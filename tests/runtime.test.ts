@@ -5,8 +5,9 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { selectContext } from '../packages/agent-runtime/context';
 import type { ModelAdapter } from '../packages/agent-runtime/model';
 import { operationKey, Runtime } from '../packages/agent-runtime/runtime';
-import { fixturePlans, seed } from '../packages/research/fixtures';
-import { commercialFacts, compareFacts, normalizePricing } from '../packages/research/pricing';
+import { initializeAgents } from '../packages/research/agents';
+import { addSource, evidenceAdapter } from './support';
+import { normalizePricing } from '../packages/research/pricing';
 import { isPublicIpv4 } from '../packages/research/sources/public-page';
 import { Subscriptions } from '../packages/research/subscriptions';
 import { now, Store } from '../packages/storage/index';
@@ -15,8 +16,8 @@ const resources: { store: Store; runtime: Runtime; dir: string }[] = [];
 function setup(adapter?: ModelAdapter) {
   const dir = mkdtempSync(join(tmpdir(), 'agent-studio-'));
   const store = new Store(join(dir, 'test.sqlite'));
-  seed(store);
-  const runtime = new Runtime(store, undefined, adapter ? { live: adapter } : undefined);
+  initializeAgents(store);
+  const runtime = new Runtime(store, undefined, { live: adapter || evidenceAdapter });
   resources.push({ store, runtime, dir });
   return { store, runtime, dir };
 }
@@ -28,22 +29,27 @@ afterEach(async () => {
   }
 });
 
-describe('确定性定价与变化规则', () => {
-  it('保留年付承诺与最低三席，不将月均价格当月付', () => {
-    const prices = normalizePricing(fixturePlans('baseline'), 2);
-    expect(prices[1].monthlyEquivalent).toBe('19.00');
-    expect(prices[1].teamMonthly).toBe('57.00');
-    expect(prices[1].annualTotal).toBe('684.00');
-    expect(prices[1].conditions).toContain('按年付款');
-    expect(prices[0].teamMonthly).toBe('58.00');
-    expect(() => normalizePricing(fixturePlans('baseline'), 0)).toThrow();
-  });
-  it('只识别可对齐的价格与授权变化；阈值为严格大于', () => {
-    const changes = compareFacts(commercialFacts('baseline'), 'updated', 10);
-    expect(changes).toHaveLength(2);
-    expect(changes[0].percent).toBe('34.48');
-    expect(compareFacts(commercialFacts('baseline'), 'baseline', 10)).toEqual([]);
-    expect(compareFacts(commercialFacts('baseline'), 'updated', 35)).toHaveLength(1);
+describe('确定性定价规则', () => {
+  it('保留年付承诺与最低席位，不将月均价格当月付', () => {
+    const plan = {
+      competitor: '协议测试产品',
+      plan: '测试套餐',
+      amount: '120',
+      currency: 'USD',
+      billingPeriod: 'year' as const,
+      unit: 'seat' as const,
+      minimumSeats: 3,
+      quota: '未知',
+      commercialRights: '未知',
+      api: '未知',
+      evidenceId: 'test',
+    };
+    const [price] = normalizePricing([plan], 2);
+    expect(price.monthlyEquivalent).toBe('10.00');
+    expect(price.teamMonthly).toBe('30.00');
+    expect(price.annualTotal).toBe('360.00');
+    expect(price.conditions).toContain('按年付款');
+    expect(() => normalizePricing([plan], 0)).toThrow();
   });
 });
 describe('完整单 Agent ReAct 与 SQLite 历史链路', () => {
@@ -78,7 +84,6 @@ describe('完整单 Agent ReAct 与 SQLite 历史链路', () => {
       prompt: '查证价格',
       mode: 'single',
       provider: 'live',
-      dataset: 'baseline',
     });
     runtime.start();
     await runtime.idle();
@@ -87,7 +92,6 @@ describe('完整单 Agent ReAct 与 SQLite 历史链路', () => {
       prompt: '继续',
       mode: 'single',
       provider: 'live',
-      dataset: 'baseline',
     });
     await runtime.idle();
     expect(calls).toBe(3);
@@ -107,7 +111,6 @@ describe('完整单 Agent ReAct 与 SQLite 历史链路', () => {
             : `预算核对第${i}轮`,
         mode: 'single',
         provider: 'live',
-        dataset: 'baseline',
       });
       conversationId = r.conversationId;
       store.finish(r.id, 'completed', `预算已核对第${i}轮`);
@@ -117,14 +120,13 @@ describe('完整单 Agent ReAct 与 SQLite 历史链路', () => {
       prompt: '查询早期约束',
       mode: 'single',
       provider: 'live',
-      dataset: 'baseline',
     });
     const context = {
       runId: current.id,
       taskKey: 'root',
       conversationId: conversationId!,
       provider: 'live' as const,
-      dataset: 'baseline' as const,
+
       signal: new AbortController().signal,
     };
     const first = (await runtime.tools.execute('search_history', { query: '预算 5人' }, context, [
@@ -152,7 +154,6 @@ describe('完整单 Agent ReAct 与 SQLite 历史链路', () => {
       prompt: '检查价格',
       mode: 'single',
       provider: 'live',
-      dataset: 'baseline',
     });
     runtime.start();
     await runtime.idle();
@@ -176,7 +177,6 @@ describe('完整单 Agent ReAct 与 SQLite 历史链路', () => {
       prompt: '检查价格',
       mode: 'single',
       provider: 'live',
-      dataset: 'baseline',
     });
     runtime.start();
     await runtime.idle();
@@ -184,19 +184,30 @@ describe('完整单 Agent ReAct 与 SQLite 历史链路', () => {
     expect(store.run(r.id).status).toBe('failed');
     expect(store.reports()).toHaveLength(0);
   });
+  it('已有证据未经本轮工具读取也不能被直接引用', async () => {
+    const { store, runtime } = setup({
+      complete: async () => ({ content: '[未读取来源](/evidence/source_test)', toolCalls: [] }),
+    });
+    addSource(store);
+    const run = store.createRun({ prompt: '核验引用', mode: 'single', provider: 'live' });
+    runtime.start();
+    await runtime.idle();
+    expect(store.run(run.id).status).toBe('failed');
+    expect(store.reports()).toHaveLength(0);
+  });
   it('真正执行工具、保存 checkpoint、生成带引用报告并能重新打开数据库', async () => {
     const { store, runtime, dir } = setup();
+    addSource(store);
     const run = store.createRun({
       prompt: '按 3 人团队比较定价',
       mode: 'single',
-      provider: 'demo',
-      dataset: 'baseline',
+      provider: 'live',
     });
     runtime.start();
     await runtime.idle();
     expect(store.run(run.id).status).toBe('completed');
-    expect(store.run(run.id).answer).toContain('684.00');
-    expect(store.all('SELECT * FROM tool_calls WHERE runId=?', run.id)).toHaveLength(3);
+    expect(store.run(run.id).answer).toContain('每年 USD 120');
+    expect(store.all('SELECT * FROM tool_calls WHERE runId=?', run.id)).toHaveLength(1);
     expect(store.events(run.id).some((e) => e.type === 'message.delta')).toBe(true);
     expect(store.checkpoint<{ final: string }>(run.id, 'root')?.final).toContain('/evidence/');
     const anotherConnection = new Store(join(dir, 'test.sqlite'));
@@ -205,30 +216,6 @@ describe('完整单 Agent ReAct 与 SQLite 历史链路', () => {
     expect(detail.reports).toHaveLength(1);
     expect(detail.messages[1].content).toBe(store.run(run.id).answer);
     anotherConnection.close();
-  });
-  it('追问通过历史工具恢复当前会话约束', async () => {
-    const { store, runtime } = setup();
-    runtime.start();
-    const a = store.createRun({
-      prompt: '按 3 人团队研究定价',
-      mode: 'single',
-      provider: 'demo',
-      dataset: 'baseline',
-    });
-    await runtime.idle();
-    const b = store.createRun({
-      conversationId: a.conversationId,
-      prompt: '继续刚才的研究，说明年付条件',
-      mode: 'single',
-      provider: 'demo',
-      dataset: 'baseline',
-    });
-    await runtime.idle();
-    expect(store.run(b.id).status).toBe('completed');
-    expect(
-      store.get("SELECT id FROM tool_calls WHERE runId=? AND name='search_history'", b.id)
-    ).toBeTruthy();
-    expect(store.run(b.id).answer).toContain('按 3 人团队研究定价');
   });
   it('恢复已提交工具结果而不重复执行', async () => {
     let toolMessages = 0;
@@ -242,7 +229,6 @@ describe('完整单 Agent ReAct 与 SQLite 历史链路', () => {
       prompt: '恢复工具执行',
       mode: 'single',
       provider: 'live',
-      dataset: 'baseline',
     });
     const call = {
       id: 'saved_call',
@@ -304,7 +290,6 @@ describe('完整单 Agent ReAct 与 SQLite 历史链路', () => {
       prompt: '慢速模型任务',
       mode: 'single',
       provider: 'live',
-      dataset: 'baseline',
     });
     runtime.start();
     await new Promise((resolve) => setTimeout(resolve, 30));
@@ -318,13 +303,12 @@ describe('完整单 Agent ReAct 与 SQLite 历史链路', () => {
     const r = store.createRun({
       prompt: '固定版本',
       mode: 'single',
-      provider: 'demo',
-      dataset: 'baseline',
+      provider: 'live',
     });
     const agent = store.agents()[0];
     store.saveAgent(agent.id, '新职责配置', agent.draftRevision, true);
-    expect(store.run(r.id).snapshot.root.version).toBe(1);
-    expect(store.agents()[0].version).toBe(2);
+    expect(store.run(r.id).snapshot.root.version).toBe(3);
+    expect(store.agents()[0].version).toBe(4);
     expect(() => store.saveAgent(agent.id, '旧请求', agent.draftRevision, true)).toThrow(
       '配置已更新'
     );
@@ -337,7 +321,9 @@ describe('完整单 Agent ReAct 与 SQLite 历史链路', () => {
           const source = JSON.parse(tool.content || '{}').data.sources[0];
           return { content: `${source.competitor} [原文](/evidence/${source.id})`, toolCalls: [] };
         }
-        const competitor = req.messages.at(-1)!.content!.includes('Alpha') ? 'Alpha' : 'Beta';
+        const competitor = req.messages.at(-1)!.content!.includes('测试产品一')
+          ? '测试产品一'
+          : '测试产品二';
         return {
           content: '',
           toolCalls: [
@@ -350,7 +336,7 @@ describe('完整单 Agent ReAct 与 SQLite 历史链路', () => {
         };
       },
     });
-    for (const name of ['Alpha', 'Beta'])
+    for (const name of ['测试产品一', '测试产品二'])
       store.putEvidence({
         id: `real_${name}`,
         competitor: name,
@@ -358,43 +344,42 @@ describe('完整单 Agent ReAct 与 SQLite 历史链路', () => {
         url: '',
         content: `${name} 用户上传资料`,
         kind: 'upload',
-        dataset: 'all',
+
         observedAt: now(),
         hash: name,
         metadata: {},
       });
     runtime.start();
     const a = store.createRun({
-      prompt: '研究 Alpha',
+      prompt: '研究 测试产品一',
       mode: 'single',
       provider: 'live',
-      dataset: 'baseline',
     });
     await runtime.idle();
     const b = store.createRun({
-      prompt: '研究 Beta',
+      prompt: '研究 测试产品二',
       mode: 'single',
       provider: 'live',
-      dataset: 'baseline',
     });
     await runtime.idle();
-    expect(store.run(a.id).answer).toContain('Alpha');
-    expect(store.run(b.id).answer).toContain('Beta');
+    expect(store.run(a.id).answer).toContain('测试产品一');
+    expect(store.run(b.id).answer).toContain('测试产品二');
     expect(store.all("SELECT * FROM tool_calls WHERE name='query_evidence'")).toHaveLength(2);
   });
   it('崩溃后的过期租约从已提交回答恢复并完成报告', async () => {
     const { store, runtime } = setup();
+    addSource(store);
     const r = store.createRun({
       prompt: '恢复研究',
       mode: 'single',
-      provider: 'demo',
-      dataset: 'baseline',
+      provider: 'live',
     });
+    store.exec('INSERT INTO run_evidence VALUES(?,?)', r.id, 'source_test');
     store.saveCheckpoint(r.id, 'root', {
       messages: [],
       step: 3,
       pending: [],
-      final: '已提交的结论 [原始来源](/evidence/fx_alpha_pricing_baseline)',
+      final: '已提交的结论 [原始来源](/evidence/source_test)',
     });
     store.exec(
       "UPDATE runs SET status='running',owner='dead_process',leaseUntil='2000-01-01T00:00:00.000Z' WHERE id=?",
@@ -414,7 +399,8 @@ describe('完整单 Agent ReAct 与 SQLite 历史链路', () => {
 describe('多 Agent、发布订阅与崩溃后的告警补偿', () => {
   it('订阅固定已发布任务模板与 Agent 版本，新发布只影响新订阅', () => {
     const { store } = setup();
-    const service = new Subscriptions(store);
+    const service = new Subscriptions(store, () => true);
+    addSource(store, { kind: 'web', url: 'https://public.example/pricing' });
     const template = service.saveTemplate({
       name: '商业化观察',
       prompt: '比较定价与授权',
@@ -425,7 +411,7 @@ describe('多 Agent、发布订阅与崩溃后的告警补偿', () => {
       name: '旧版本订阅',
       prompt: '观察变化',
       intervalMinutes: 1440,
-      threshold: 10,
+      sourceIds: ['source_test'],
     });
     const root = store.agents()[0];
     store.saveAgent(root.id, '更新的主 Agent 职责', root.draftRevision, true);
@@ -441,77 +427,53 @@ describe('多 Agent、发布订阅与崩溃后的告警补偿', () => {
       name: '新版本订阅',
       prompt: '观察变化',
       intervalMinutes: 1440,
-      threshold: 10,
+      sourceIds: ['source_test'],
     });
-    expect(service.trigger(old.id).snapshot.root.version).toBe(1);
-    expect(service.trigger(latest.id).snapshot.root.version).toBe(2);
+    expect(service.trigger(old.id).snapshot.root.version).toBe(3);
+    expect(service.trigger(latest.id).snapshot.root.version).toBe(4);
     expect(old.templateVersion).toBe(1);
     expect(latest.templateVersion).toBe(2);
   });
-  it('完成全部业务 Agent，允许前后快照证据并保存任务依赖过程', async () => {
-    const { store, runtime } = setup();
-    const r = store.createRun({
-      prompt: '比较三个竞品商业化变化，按3人团队计算',
-      mode: 'multi',
-      provider: 'demo',
-      dataset: 'updated',
+  it('多 Agent 使用真实资料工具，保存子任务结果与引用', async () => {
+    const { store, runtime } = setup({
+      complete: async (req) => {
+        const tool = req.messages.filter((m) => m.role === 'tool').at(-1);
+        if (req.agent.id === 'root' && !tool)
+          return {
+            content: '',
+            toolCalls: [
+              {
+                id: 'delegate',
+                type: 'function',
+                function: {
+                  name: 'delegate_tasks',
+                  arguments: JSON.stringify({
+                    tasks: [
+                      { agent: 'research', goal: '核对原文' },
+                      { agent: 'verifier', goal: '核验引用' },
+                    ],
+                  }),
+                },
+              },
+            ],
+          };
+        if (req.agent.id === 'root')
+          return { content: '综合结论 [原文](/evidence/source_test)', toolCalls: [] };
+        return evidenceAdapter.complete(req);
+      },
     });
+    addSource(store);
+    const r = store.createRun({ prompt: '协作研究', mode: 'multi', provider: 'live' });
     runtime.start();
     await runtime.idle();
     expect(store.run(r.id).status).toBe('completed');
     expect(
       store.all("SELECT * FROM tasks WHERE runId=? AND status='completed'", r.id)
-    ).toHaveLength(6);
-    expect(store.run(r.id).answer).toContain('34.48');
-    expect(store.reports()[0].evidenceIds.some((id) => id.endsWith('_baseline'))).toBe(true);
-  });
-  it('重复触发只有一个逻辑任务，通知一次且完成后推进基线', async () => {
-    const { store, runtime } = setup();
-    const subscriptions = new Subscriptions(store);
-    const sub = subscriptions.create({
-      name: '价格与授权',
-      prompt: '检查商业化变化',
-      intervalMinutes: 1440,
-      threshold: 10,
-    });
-    store.setSetting('dataset', 'updated');
-    const r = subscriptions.trigger(sub.id, 'scheduled-time');
-    expect(subscriptions.trigger(sub.id, 'scheduled-time').id).toBe(r.id);
-    runtime.start();
-    await runtime.idle();
-    expect(store.run(r.id).status).toBe('completed');
-    // Simulate restart between report commit and subscription processing.
-    expect(store.notifications()).toHaveLength(0);
-    subscriptions.tick();
-    subscriptions.tick();
-    expect(store.notifications()).toHaveLength(1);
-    expect(store.notifications()[0].content).toContain('34.48');
-    expect(subscriptions.find(sub.id).baselineDataset).toBe('updated');
-    subscriptions.trigger(sub.id, 'next-scheduled-time');
-    await runtime.idle();
-    subscriptions.tick();
-    expect(store.notifications()).toHaveLength(1);
-    subscriptions.stop();
-  });
-  it('失败保留基线，暂停订阅不创建新任务', () => {
-    const { store } = setup();
-    const subscriptions = new Subscriptions(store);
-    const sub = subscriptions.create({
-      name: '失败规则',
-      prompt: '巡检',
-      intervalMinutes: 1,
-      threshold: 10,
-    });
-    store.setSetting('dataset', 'updated');
-    const r = subscriptions.trigger(sub.id, 'failed-time');
-    store.finish(r.id, 'failed', '采集失败', 'HTTP 403');
-    subscriptions.process(store.run(r.id));
-    expect(subscriptions.find(sub.id).baselineDataset).toBe('baseline');
-    expect(store.notifications()[0].title).toContain('检查失败');
-    subscriptions.update(sub.id, { revision: sub.revision, enabled: false });
-    expect(() => subscriptions.trigger(sub.id)).toThrow('请先启用');
+    ).toHaveLength(3);
+    expect(store.reports()[0].evidenceIds).toEqual(['source_test']);
   });
 });
+
 it('拒绝 URL 抓取本机、内网、链路本地与保留 IPv4 地址', () => {
   for (const address of [
     '127.0.0.1',

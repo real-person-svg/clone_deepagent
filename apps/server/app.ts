@@ -3,7 +3,7 @@ import Fastify from 'fastify';
 import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { Runtime } from '../../packages/agent-runtime/runtime';
-import { seed } from '../../packages/research/fixtures';
+import { initializeAgents } from '../../packages/research/agents';
 import { Subscriptions } from '../../packages/research/subscriptions';
 import { Store } from '../../packages/storage/index';
 import type { AppContext, AppOptions } from './context';
@@ -20,10 +20,10 @@ export async function createApp(options: AppOptions = {}) {
   const app = Fastify({ logger: options.logger ?? false, bodyLimit: 2 * 1024 * 1024 });
   const store = new Store(options.databasePath || './data/workspace.sqlite');
 
-  seed(store);
+  initializeAgents(store);
 
   const runtime = new Runtime(store, options.live);
-  const subscriptions = new Subscriptions(store);
+  const subscriptions = new Subscriptions(store, () => runtime.liveConfigured);
 
   runtime.onComplete = (r) => subscriptions.process(r);
   const context: AppContext = { app, store, runtime, subscriptions, options };

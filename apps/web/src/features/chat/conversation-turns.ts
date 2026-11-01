@@ -26,7 +26,8 @@ export function conversationTurns(
       const showAnswer = Boolean(answer);
       const showThinking = !answer && isActive;
       const modeLabel = run.mode === 'multi' ? '多 Agent 协作' : '单 Agent · ReAct';
-      const providerLabel = run.provider === 'demo' ? '离线演示' : '真实模型';
+      const providerLabel = '真实模型';
+      const agentName = run.snapshot[run.agentId || 'root']?.name || '研究 Agent';
       const traceFailed = ['failed', 'cancelled', 'partial'].includes(run.status);
       const thinkingLabel =
         run.mode === 'multi' ? '正在协调研究任务与来源证据' : '正在读取资料并执行工具';
@@ -44,6 +45,7 @@ export function conversationTurns(
         showThinking,
         modeLabel,
         providerLabel,
+        agentName,
         traceFailed,
         thinkingLabel,
         statusLabel,

@@ -125,10 +125,7 @@
   .composer-right {
     gap: 8px;
   }
-  .mode-toggle {
-    font-size: 12px;
-    padding: 4px;
-  }
+
   .provider-button {
     font-size: 13px;
   }
@@ -137,16 +134,7 @@
     height: 32px;
     margin-left: 0;
   }
-  .composer-caption {
-    right: 22px;
-    left: 22px;
-    bottom: 0;
-    font-size: 10px;
-    line-height: 14px;
-  }
-  .composer-caption > span:last-child {
-    display: none;
-  }
+
   .conversation-content {
     padding: 20px 16px 8px;
   }

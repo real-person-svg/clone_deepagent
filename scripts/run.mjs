@@ -46,7 +46,6 @@ const commands = {
   typecheck: [['node_modules/typescript/bin/tsc', '--noEmit']],
   test: [['node_modules/vitest/vitest.mjs', 'run']],
   'test:ui': [['node_modules/@playwright/test/cli.js', 'test']],
-  'validate:live': [['--import', 'tsx', 'scripts/validate-live.ts']],
   format: [
     [
       'node_modules/prettier/bin/prettier.cjs',

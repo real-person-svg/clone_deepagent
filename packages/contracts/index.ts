@@ -1,6 +1,5 @@
 export type AgentMode = 'single' | 'multi';
-export type ProviderMode = 'demo' | 'live';
-export type Dataset = 'baseline' | 'updated';
+export type ProviderMode = 'live';
 export type RunStatus =
   | 'queued'
   | 'running'
@@ -36,7 +35,7 @@ export interface Run {
   prompt: string;
   mode: AgentMode;
   provider: ProviderMode;
-  dataset: Dataset;
+  agentId: string;
   status: RunStatus;
   answer: string;
   error: string | null;
@@ -75,8 +74,7 @@ export interface Evidence {
   title: string;
   url: string;
   content: string;
-  kind: 'fixture' | 'upload' | 'web';
-  dataset: Dataset | 'all';
+  kind: 'upload' | 'web';
   observedAt: string;
   hash: string;
   metadata: Record<string, unknown>;
@@ -109,7 +107,6 @@ export interface Report {
   title: string;
   content: string;
   evidenceIds: string[];
-  dataset: Dataset;
   createdAt: string;
 }
 export interface Subscription {
@@ -118,9 +115,8 @@ export interface Subscription {
   prompt: string;
   enabled: number;
   intervalMinutes: number;
-  threshold: number;
   baseline: Record<string, string>;
-  baselineDataset: Dataset;
+  sourceIds: string[];
   nextFireAt: string;
   lastRunAt: string | null;
   lastRunId: string | null;

@@ -12,7 +12,9 @@ export function SubscriptionEditor({
     name,
     prompt,
     interval,
-    threshold,
+    sources,
+    sourceIds,
+    handleSourceChange,
     busy,
     templateId,
     handleCloseCreate,
@@ -23,8 +25,6 @@ export function SubscriptionEditor({
     handleNameChange,
     handlePromptChange,
     handleIntervalChange,
-    handleThresholdChange,
-    baselineLabel,
   } = subscriptions;
   return (
     <Modal
@@ -48,8 +48,7 @@ export function SubscriptionEditor({
     >
       <div className="form-stack">
         <p className="caption">
-          使用虚构资料和已发布的 Agent 版本执行多 Agent
-          研究。无变化时保持安静，异常或检查失败时写入站内通知。
+          定期重新采集选定的公开页面，使用服务端真实模型分析。来源内容更新或检查未完成时写入站内通知，无变化时保持安静。每次研究会消耗模型额度。
         </p>
         <label>
           已发布任务模板
@@ -76,25 +75,29 @@ export function SubscriptionEditor({
               <option value={1440}>每天</option>
               <option value={60}>每小时</option>
               <option value={5}>每 5 分钟</option>
-              <option value={1}>每分钟（验收用）</option>
             </select>
           </label>
-          <label>
-            价格变化阈值（%）
-            <input
-              type="number"
-              min={0}
-              max={1000}
-              value={threshold}
-              onChange={handleThresholdChange}
-            />
-          </label>
         </div>
+        <fieldset className="form-stack">
+          <legend>监控来源（1 至 10 个公开页面）</legend>
+          {!sources.length && (
+            <p className="caption">请先在“来源资料”采集官方公开页面，再创建订阅。</p>
+          )}
+          {sources.map((source) => (
+            <label key={source.id}>
+              <input
+                type="checkbox"
+                checked={sourceIds.includes(source.id)}
+                onChange={(event) => handleSourceChange(source.id, event.target.checked)}
+              />
+              {source.competitor} · {source.title}
+            </label>
+          ))}
+        </fieldset>
         <div className="info-strip">
           <ShieldCheck size={15} />
           <span>
-            基线使用当前{baselineLabel}
-            快照。首次创建建立基线，不生成变化告警。
+            所选来源的当前原文作为基线。内容更新仅表示原文变化，是否影响价格或授权需结合报告核对。
           </span>
         </div>
       </div>

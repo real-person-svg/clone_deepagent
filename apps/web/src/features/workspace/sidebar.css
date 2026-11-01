@@ -295,20 +295,12 @@
   font-weight: 500;
   color: #6b6b73;
 }
-.workspace-button small {
-  display: flex;
-  gap: 5px;
-  align-items: center;
-  font-size: 12px;
-  color: #8e8e96;
-}
 .workspace-button svg {
   color: #8e8e96;
 }
 i {
   font-style: normal;
 }
-.workspace-button i,
 .subtle-badge i {
   width: 5px;
   height: 5px;

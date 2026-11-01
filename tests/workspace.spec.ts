@@ -1,17 +1,30 @@
 import { expect, test } from '@playwright/test';
 
-test('桌面工作台的研究、证据、报告、Agent、资料与订阅流程', async ({ page }) => {
+test('桌面工作台的研究、证据、报告、Agent、资料与订阅流程', async ({ page }, testInfo) => {
   const errors: string[] = [];
   page.on('pageerror', (error) => errors.push(error.message));
   await page.goto('/');
 
-  const selector = page.getByRole('button', { name: '切换研究 Agent' });
+  await page.request.post('/api/documents', {
+    data: {
+      title: '浏览器协议测试来源',
+      competitor: '协议测试产品',
+      content: '协议测试原文：每年 USD 120，按席位计费。',
+    },
+  });
+  const selector = page.locator('.composer').getByRole('button', { name: '切换研究 Agent' });
   await selector.click();
-  await expect(page.getByRole('menuitemradio', { name: /研究 Agent/ })).toBeFocused();
+  const published = await (await page.request.get('/api/agents')).json();
+  await expect(page.getByRole('menuitemradio')).toHaveCount(published.length);
+  await expect(page.locator('.agent-menu .switcher-body strong')).toHaveText(
+    published.map((a: { name: string }) => a.name)
+  );
+  await expect(page.getByRole('menuitemradio', { name: /研究主 Agent/ })).toBeFocused();
   await page.keyboard.press('End');
-  await expect(page.getByRole('menuitemradio', { name: /竞品分析团队/ })).toBeFocused();
+  await expect(page.getByRole('menuitemradio', { name: /证据核验 Agent/ })).toBeFocused();
   await page.keyboard.press('Escape');
   await expect(selector).toBeFocused();
+  await page.screenshot({ path: testInfo.outputPath('composer-agent-selector.png') });
   await page.getByRole('button', { name: '定价分析', exact: true }).click();
   const input = page.getByRole('textbox', { name: '研究问题' });
   await expect(input).toBeFocused();
@@ -20,9 +33,9 @@ test('桌面工作台的研究、证据、报告、Agent、资料与订阅流程
   await input.press('Enter');
   await expect(page).toHaveURL(/chat=/);
   await expect(page.getByTitle('导出 Markdown 报告')).toBeVisible();
-  await expect(page.locator('.assistant-answer')).toContainText('684');
+  await expect(page.locator('.assistant-answer')).toContainText('每年 USD 120');
   await page.reload();
-  await expect(page.locator('.assistant-answer')).toContainText('684');
+  await expect(page.locator('.assistant-answer')).toContainText('每年 USD 120');
   await page.locator('.evidence-link').first().click();
   await expect(page.getByRole('dialog', { name: '来源证据' })).toContainText('已保存的原文');
   await page.keyboard.press('Escape');
@@ -35,7 +48,7 @@ test('桌面工作台的研究、证据、报告、Agent、资料与订阅流程
 
   await page.getByRole('button', { name: '研究报告', exact: true }).click();
   await page.locator('.report-list-item').first().click();
-  await expect(page.locator('.report-document')).toContainText('684');
+  await expect(page.locator('.report-document')).toContainText('每年 USD 120');
   await page.getByRole('button', { name: '数字员工', exact: true }).click();
   await page.getByRole('button', { name: '配置与发布' }).first().click();
   const prompt = page.getByRole('dialog').getByRole('textbox');
@@ -74,25 +87,31 @@ test('桌面工作台的研究、证据、报告、Agent、资料与订阅流程
     .filter({ hasText: '回归任务模板' })
     .getByRole('button', { name: '订阅此任务' })
     .click();
-  await page.getByRole('button', { name: '创建并启用', exact: true }).click();
-  await expect(page.locator('.subscription-card')).toHaveCount(1);
-  await page.getByTitle('切换虚构资料快照以验证变化').click();
-  await page.getByRole('button', { name: '立即检查', exact: true }).click();
-  await expect(page.getByTitle('导出 Markdown 报告')).toBeVisible();
-  await page.getByRole('button', { name: '研究通知', exact: true }).click();
-  await expect(page.locator('.notification-item').first()).toContainText('商业化变化');
-  await page.getByRole('button', { name: '标为已读', exact: true }).first().click();
-  await expect(page.locator('.notification-item').first()).toHaveClass(/read/);
+  await expect(page.getByRole('button', { name: '创建并启用', exact: true })).toBeDisabled();
+  await expect(page.getByRole('dialog')).toContainText('请先在“来源资料”采集官方公开页面');
   expect(errors).toEqual([]);
 });
 
-test('移动端侧栏、输入、附件与任务停止', async ({ page }) => {
+test('移动端侧栏、输入、附件与任务停止', async ({ page }, testInfo) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/');
   await expect(page.getByRole('button', { name: '展开侧栏' })).toBeVisible();
   await page.getByRole('button', { name: '展开侧栏' }).click();
   await expect(page.getByRole('button', { name: '来源资料', exact: true })).toBeVisible();
   await page.getByRole('button', { name: '收起侧栏' }).click();
+  const selector = page.locator('.composer').getByRole('button', { name: '切换研究 Agent' });
+  await selector.click();
+  const menu = page.getByRole('menu', { name: '选择研究 Agent' });
+  await expect(menu).toBeVisible();
+  const menuBounds = await menu.boundingBox();
+  const composerBounds = await page.locator('.composer').boundingBox();
+  expect(menuBounds!.x).toBeGreaterThanOrEqual(0);
+  expect(menuBounds!.x + menuBounds!.width).toBeLessThanOrEqual(390);
+  expect(menuBounds!.y + menuBounds!.height).toBeLessThanOrEqual(composerBounds!.y);
+  await page.screenshot({ path: testInfo.outputPath('mobile-agent-menu.png') });
+  await page.keyboard.press('End');
+  await page.keyboard.press('Enter');
+  await expect(selector).toContainText('证据核验 Agent');
   await page.locator('input[type=file]').setInputFiles({
     name: 'notes.md',
     mimeType: 'text/markdown',
@@ -101,10 +120,14 @@ test('移动端侧栏、输入、附件与任务停止', async ({ page }) => {
   await expect(page.locator('.attachment-chip')).toContainText('notes.md');
   await page.getByRole('button', { name: '移除附件' }).click();
   await expect(page.locator('.attachment-chip')).toBeHidden();
-  await page
-    .getByRole('textbox', { name: '研究问题' })
-    .fill('比较三个竞品的商业化策略、价格和产品能力');
+  await page.getByRole('textbox', { name: '研究问题' }).fill('慢速协议任务：研究已导入资料');
+  const submitted = page.waitForResponse(
+    (response) => response.url().endsWith('/api/runs') && response.request().method() === 'POST'
+  );
   await page.getByRole('button', { name: '发送研究问题' }).click();
+  const run = await (await submitted).json();
+  expect(run.agentId).toBe('verifier');
+  expect(run.mode).toBe('single');
   await page.getByRole('button', { name: '停止任务' }).click();
   await expect(page.getByRole('button', { name: '发送研究问题' })).toBeVisible();
   await expect(page.locator('.answer-footer')).toContainText('已停止');

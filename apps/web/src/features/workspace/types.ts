@@ -2,7 +2,7 @@ export type Page = 'chat' | 'agents' | 'sources' | 'reports' | 'subscriptions' |
 
 export interface Workspace {
   name: string;
-  dataset: string;
+
   liveConfigured: boolean;
   model: string | null;
   storage: string;

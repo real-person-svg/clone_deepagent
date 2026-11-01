@@ -81,7 +81,6 @@ export function useWorkspace() {
   const handleOpenSettings = () => setSettings(true);
 
   const liveConfigured = workspace?.liveConfigured || false;
-  const dataset = workspace?.dataset || 'baseline';
   const isChatPage = route.page === 'chat';
   const isAgentsPage = route.page === 'agents';
   const isSourcesPage = route.page === 'sources';
@@ -95,18 +94,6 @@ export function useWorkspace() {
 
   const sectionLabel = navigation.find((item) => item.id === route.page)?.label || '研究通知';
 
-  const handleToggleDataset = async () => {
-    try {
-      await api('/workspace', 'PATCH', {
-        dataset: workspace?.dataset === 'baseline' ? 'updated' : 'baseline',
-      });
-      refresh();
-    } catch (e) {
-      Toast.error((e as Error).message);
-    }
-  };
-
-  const datasetLabel = workspace?.dataset === 'updated' ? '变化快照' : '基准快照';
   const renameVisible = Boolean(rename);
 
   const handleCancelRename = () => setRename(null);
@@ -148,12 +135,7 @@ export function useWorkspace() {
   const reportCount = workspace?.stats.reports || 0;
   const evidenceCount = workspace?.stats.evidence || 0;
 
-  const handleDatasetChange = async (e: ChangeEvent<HTMLSelectElement>) => {
-    await api('/workspace', 'PATCH', { dataset: e.target.value });
-    refresh();
-  };
-
-  const modelLabel = workspace?.liveConfigured ? workspace.model : '离线演示模式';
+  const modelLabel = workspace?.liveConfigured ? workspace.model : '尚未配置模型';
 
   return {
     isChatPage,
@@ -195,10 +177,7 @@ export function useWorkspace() {
     handleOpenNotifications,
     handleOpenSettings,
     liveConfigured,
-    dataset,
     sectionLabel,
-    handleToggleDataset,
-    datasetLabel,
     renameVisible,
     handleCancelRename,
     handleConfirmRename,
@@ -211,7 +190,6 @@ export function useWorkspace() {
     conversationCount,
     reportCount,
     evidenceCount,
-    handleDatasetChange,
     modelLabel,
   };
 }

@@ -45,7 +45,7 @@ export function Sources(props: Parameters<typeof useSources>[0]) {
       <div className="info-strip">
         <Globe2 size={16} />
         <span>
-          Alpha、Beta、Gamma 为虚构测试产品。导入自己的资料，或采集公开静态页面，供真实模型研究。
+          导入真实产品资料或采集官方公开页面。来源为空时，请先添加资料；未披露的信息会标为未知。
         </span>
       </div>
       <div className="source-toolbar">

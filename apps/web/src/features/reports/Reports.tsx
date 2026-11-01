@@ -61,7 +61,7 @@ export function Reports({
         />
       ) : (
         <div className="report-list">
-          {reportCards.map(({ report: r, observedAt, datasetLabel, handleSelect }) => (
+          {reportCards.map(({ report: r, observedAt, handleSelect }) => (
             <button className="report-list-item" key={r.id} onClick={handleSelect}>
               <span className="document-icon">
                 <FileText size={20} />
@@ -69,7 +69,7 @@ export function Reports({
               <div>
                 <h2>{r.title}</h2>
                 <p>
-                  {observedAt} · {r.evidenceIds.length} 个证据引用 · {datasetLabel}
+                  {observedAt} · {r.evidenceIds.length} 个证据引用
                 </p>
               </div>
               <ArrowRight size={17} />

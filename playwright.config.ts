@@ -12,7 +12,7 @@ export default defineConfig({
     headless: true,
   },
   webServer: {
-    command: `"${process.execPath}" --import tsx scripts/serve-test.ts`,
+    command: `"${process.execPath}" --import tsx tests/serve.ts`,
     url: 'http://127.0.0.1:14317/api/health',
     reuseExistingServer: false,
   },

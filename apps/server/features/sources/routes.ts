@@ -1,25 +1,16 @@
 import { createHash } from 'node:crypto';
-import type { Dataset } from '../../../../packages/contracts/index';
 import { now, uid } from '../../../../packages/storage/index';
 import type { AppContext } from '../../context';
 import { body, getId, idParams, text } from '../../http/schema';
 export function registerSourcesRoutes({ app, store, runtime, subscriptions, options }: AppContext) {
   app.get('/api/evidence', (request) => {
     const q = request.query as {
-      dataset?: Dataset;
       competitor?: string;
       query?: string;
       kind?: string;
     };
 
-    return store
-      .evidence(
-        q.dataset || (store.setting('dataset', 'baseline') as Dataset),
-        'demo',
-        q.competitor,
-        q.query
-      )
-      .filter((e) => !q.kind || e.kind === q.kind);
+    return store.evidence(q.competitor, q.query).filter((e) => !q.kind || e.kind === q.kind);
   });
 
   app.get('/api/evidence/:id', { schema: { params: idParams } }, (request) =>
@@ -50,7 +41,6 @@ export function registerSourcesRoutes({ app, store, runtime, subscriptions, opti
         content: p.content,
         url: '',
         kind: 'upload' as const,
-        dataset: 'all' as const,
         observedAt: now(),
         hash: createHash('sha256').update(p.content).digest('hex'),
         metadata: {
@@ -78,7 +68,7 @@ export function registerSourcesRoutes({ app, store, runtime, subscriptions, opti
           taskKey: '',
           conversationId: '',
           provider: 'live',
-          dataset: 'baseline',
+
           signal: AbortSignal.timeout(20000),
         },
         ['fetch_source']

@@ -1,10 +1,9 @@
-import type { Dataset, ProviderMode } from '../../contracts/index';
+import type { ProviderMode } from '../../contracts/index';
 export interface ToolContext {
   runId: string;
   taskKey: string;
   conversationId: string;
   provider: ProviderMode;
-  dataset: Dataset;
   signal: AbortSignal;
   delegate?: (tasks: { agent: string; goal: string }[]) => Promise<unknown>;
 }

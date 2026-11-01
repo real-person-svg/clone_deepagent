@@ -7,6 +7,7 @@ export const agentNames: Record<string, string> = {
   verifier: '证据核验',
 };
 export const toolNames: Record<string, string> = {
+  search_web: '网络检索公开来源',
   list_competitors: '查看竞品与资料覆盖',
   query_evidence: '检索来源证据',
   normalize_pricing: '计算套餐与席位成本',

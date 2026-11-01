@@ -1,7 +1,6 @@
 import { Download, LoaderCircle, MessageCircle, Settings2 } from 'lucide-react';
 import { CopyButton } from '../../shared/CopyButton';
 import { Markdown } from '../../shared/Markdown';
-import { AgentSelector } from '../chat/AgentSelector';
 import { Trace } from '../chat/Trace';
 import { ChatComposer } from './ChatComposer';
 import { useChat } from './useChat';
@@ -13,12 +12,8 @@ export function Chat(props: Parameters<typeof useChat>[0]) {
     showConversation,
     showWelcome,
     detail,
-    mode,
-    setMode,
     viewport,
     chatTitle,
-    selectorCompact,
-    selectorDisabled,
     handleScroll,
     turns,
     suggestions,
@@ -32,12 +27,6 @@ export function Chat(props: Parameters<typeof useChat>[0]) {
             <h1>{chatTitle}</h1>
           </div>
         )}
-        <AgentSelector
-          mode={mode}
-          compact={selectorCompact}
-          disabled={selectorDisabled}
-          onChange={setMode}
-        />
         <button
           className="icon-button header-settings"
           aria-label="模型与工作空间设置"
@@ -67,6 +56,7 @@ export function Chat(props: Parameters<typeof useChat>[0]) {
                 showThinking,
                 modeLabel,
                 providerLabel,
+                agentName,
                 traceFailed,
                 thinkingLabel,
                 statusLabel,
@@ -79,7 +69,7 @@ export function Chat(props: Parameters<typeof useChat>[0]) {
                     <span className="agent-mark small">
                       <MessageCircle size={14} />
                     </span>
-                    <strong>研究 Agent</strong>
+                    <strong>{agentName}</strong>
                     <span>{modeLabel}</span>
                     <span className="identity-provider">{providerLabel}</span>
                   </div>

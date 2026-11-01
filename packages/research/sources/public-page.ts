@@ -30,11 +30,11 @@ export function pinnedLookup(address: string): LookupFunction {
   };
 }
 
-export async function fetchPublicPage(
+export async function fetchPublicResource(
   input: string,
   signal: AbortSignal,
   redirects = 0
-): Promise<{ url: string; title: string; text: string }> {
+): Promise<{ url: string; type: string; body: string }> {
   if (redirects > 4) throw new Error('页面重定向次数过多');
   const url = new URL(input);
   if (
@@ -62,7 +62,7 @@ export async function fetchPublicPage(
         timeout: 15000,
         headers: {
           'User-Agent': 'AgentResearchWorkspace/0.1',
-          Accept: 'text/html,text/plain',
+          Accept: 'text/html,text/plain,application/rss+xml,application/xml,text/xml',
           'Accept-Encoding': 'identity',
         },
         lookup: pinnedLookup(pinned),
@@ -95,13 +95,46 @@ export async function fetchPublicPage(
     req.end();
   });
   if (response.status >= 300 && response.status < 400 && response.location)
-    return fetchPublicPage(new URL(response.location, url).href, signal, redirects + 1);
+    return fetchPublicResource(new URL(response.location, url).href, signal, redirects + 1);
   if (response.status !== 200)
     throw new Error(`来源返回 HTTP ${response.status}，不能判断产品能力是否存在`);
+  return { url: url.href, type: response.type, body: response.body };
+}
+
+export async function fetchPublicPage(
+  input: string,
+  signal: AbortSignal
+): Promise<{ url: string; title: string; text: string; links?: { url: string; title: string }[] }> {
+  const response = await fetchPublicResource(input, signal);
+  const url = new URL(response.url);
   if (!/text\/html|text\/plain|application\/xhtml/.test(response.type))
     throw new Error('目前仅支持 HTML 和纯文本网页');
   const $ = cheerio.load(response.body);
   const title = $('title').text().trim() || url.hostname;
+  const links: { url: string; title: string }[] = [];
+  const seen = new Set<string>();
+  $('a[href]').each((_index, element) => {
+    const label = $(element).text().trim().slice(0, 160);
+    try {
+      const target = new URL($(element).attr('href')!, url);
+      target.hash = '';
+      if (
+        !['http:', 'https:'].includes(target.protocol) ||
+        target.username ||
+        target.password ||
+        (target.port && !['80', '443'].includes(target.port)) ||
+        seen.has(target.href) ||
+        !/pric|plan|licen|legal|terms|policy|help|support|about|会员|价格|定价|套餐|条款|协议|授权|帮助|关于/i.test(
+          `${label} ${target.pathname}`
+        )
+      )
+        return;
+      seen.add(target.href);
+      links.push({ url: target.href, title: label || target.pathname });
+    } catch {
+      /* Ignore malformed page links; destination addresses are checked at fetch time. */
+    }
+  });
   $('script,style,noscript,iframe,svg,nav,header,footer').remove();
   $('br').replaceWith('\n');
   $('p,div,li,tr,h1,h2,h3').append('\n');
@@ -113,5 +146,5 @@ export async function fetchPublicPage(
     .slice(0, 60000);
   if (text.length < 40) throw new Error('页面正文不足，可能需要浏览器渲染；请上传资料补充');
 
-  return { url: url.href, title, text };
+  return { url: url.href, title, text, links: links.slice(0, 40) };
 }

@@ -1,4 +1,5 @@
 export const toolLabels: Record<string, string> = {
+  search_web: '网络检索',
   list_competitors: '竞品目录',
   query_evidence: '资料检索',
   normalize_pricing: '定价计算',

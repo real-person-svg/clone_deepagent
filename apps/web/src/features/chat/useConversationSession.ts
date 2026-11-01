@@ -1,10 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type {
-  AgentMode,
-  ConversationDetail,
-  ProviderMode,
-  RunEvent,
-} from '../../../../../packages/contracts/index';
+import type { ConversationDetail, RunEvent } from '../../../../../packages/contracts/index';
 import { terminalStatuses } from '../../../../../packages/contracts/index';
 import { api } from '../../shared/api';
 import { loadRunEvents } from './events-api';
@@ -18,8 +13,7 @@ export interface Attachment {
 export function useConversationSession(conversationId: string | null, refresh: () => void) {
   const [detail, setDetail] = useState<ConversationDetail | null>(null);
   const [input, setInput] = useState('');
-  const [mode, setMode] = useState<AgentMode>('single');
-  const [provider, setProvider] = useState<ProviderMode>('demo');
+  const [agentId, setAgentId] = useState('root');
   const [events, setEvents] = useState<Record<string, RunEvent[]>>({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -46,6 +40,7 @@ export function useConversationSession(conversationId: string | null, refresh: (
     stick.current = true;
     if (!conversationId) {
       setDetail(null);
+      setAgentId('root');
       setLoading(false);
 
       return;
@@ -55,8 +50,7 @@ export function useConversationSession(conversationId: string | null, refresh: (
       .then(async (d) => {
         if (req !== requestId.current) return;
         setDetail(d);
-        setMode(d.mode);
-        if (d.runs.length) setProvider(d.runs.at(-1)!.provider);
+        setAgentId(d.runs.at(-1)?.agentId || 'root');
         const logs = await Promise.all(
           d.runs.map(async (r) => [r.id, await loadRunEvents(r.id)] as const)
         );
@@ -83,10 +77,8 @@ export function useConversationSession(conversationId: string | null, refresh: (
     detail,
     input,
     setInput,
-    mode,
-    setMode,
-    provider,
-    setProvider,
+    agentId,
+    setAgentId,
     events,
     setEvents,
     loading,

@@ -5,7 +5,6 @@ export function WorkspaceDialogs({ workspace }: { workspace: ReturnType<typeof u
     title,
     deleting,
     settings,
-    dataset,
     renameVisible,
     handleCancelRename,
     handleConfirmRename,
@@ -18,7 +17,6 @@ export function WorkspaceDialogs({ workspace }: { workspace: ReturnType<typeof u
     conversationCount,
     reportCount,
     evidenceCount,
-    handleDatasetChange,
     modelLabel,
   } = workspace;
 
@@ -70,16 +68,6 @@ export function WorkspaceDialogs({ workspace }: { workspace: ReturnType<typeof u
               <span>来源快照</span>
             </div>
           </div>
-          <label>
-            虚构资料快照
-            <select value={dataset} onChange={handleDatasetChange}>
-              <option value="baseline">基准期 · 2026-10-25</option>
-              <option value="updated">变化期 · 2026-11-01</option>
-            </select>
-          </label>
-          <p className="caption">
-            切换快照只影响新任务。旧报告始终保留原始引用。变化期包含 Alpha 涨价和 Gamma 授权变化。
-          </p>
           <div className="settings-model">
             <strong>模型连接</strong>
             <span>{modelLabel}</span>

@@ -4,7 +4,6 @@ import type {
   AgentSummary,
   Conversation,
   ConversationDetail,
-  Dataset,
   Evidence,
   Message,
   Notification,
@@ -89,11 +88,17 @@ export class Store extends Database {
     prompt: string;
     mode: AgentMode;
     provider: ProviderMode;
-    dataset: Dataset;
+    agentId?: string;
     subscriptionId?: string;
     snapshot?: Record<string, AgentSpec>;
   }) {
     return this.tx(() => {
+      const agentId = input.agentId || 'root';
+      const available = input.snapshot || Object.fromEntries(this.agents().map((a) => [a.id, a]));
+      const selected = available[agentId];
+      if (!selected) throw new AppError(404, '数字员工不存在或未发布', 'AGENT_NOT_FOUND');
+      if (input.mode === 'multi' && !selected.tools.includes('delegate_tasks'))
+        throw new AppError(400, '所选数字员工不具备任务委派权限', 'AGENT_MODE_INVALID');
       const c = input.conversationId
         ? this.detail(input.conversationId)
         : this.createConversation(input.prompt.slice(0, 32), input.mode);
@@ -123,18 +128,19 @@ export class Store extends Database {
           ])
         );
       this.exec(
-        'INSERT INTO runs(id,conversationId,prompt,mode,provider,dataset,status,snapshot,subscriptionId,createdAt,updatedAt) VALUES(?,?,?,?,?,?,?,?,?,?,?)',
+        'INSERT INTO runs(id,conversationId,prompt,mode,provider,dataset,status,snapshot,subscriptionId,createdAt,updatedAt,agentId) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)',
         id,
         c.id,
         input.prompt,
         input.mode,
         input.provider,
-        input.dataset,
+        'current',
         'queued',
         JSON.stringify(snapshot),
         input.subscriptionId || null,
         time,
-        time
+        time,
+        agentId
       );
       this.exec(
         'INSERT INTO messages VALUES(?,?,?,?,?,?,?)',
@@ -166,7 +172,7 @@ export class Store extends Database {
       this.event(id, 'run.queued', 'root', {
         mode: input.mode,
         provider: input.provider,
-        dataset: input.dataset,
+        agentId,
       });
 
       return this.run(id);
@@ -320,15 +326,36 @@ export class Store extends Database {
     });
   }
 
-  evidence(dataset: Dataset, provider: ProviderMode = 'demo', competitor = '', query = '') {
+  evidence(competitor = '', query = '') {
     return this.all<Record<string, unknown>>(
-      `SELECT * FROM evidence WHERE (dataset=? OR dataset='all') AND (?='demo' OR kind!='fixture') AND competitor LIKE ? AND (content LIKE ? OR title LIKE ?) ORDER BY observedAt DESC`,
-      dataset,
-      provider,
+      `SELECT * FROM evidence WHERE kind IN ('upload','web') AND competitor LIKE ? AND (content LIKE ? OR title LIKE ?) ORDER BY observedAt DESC,rowid DESC`,
       `%${competitor}%`,
       `%${query}%`,
       `%${query}%`
     ).map((r) => ({ ...r, metadata: parse(r.metadata, {}) }) as unknown as Evidence);
+  }
+
+  latestEvidence(competitor = '') {
+    const seen = new Set<string>();
+    return this.evidence(competitor).filter((e) => {
+      const key = JSON.stringify([e.competitor, e.kind, e.url || e.title]);
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  }
+
+  researchEvidence(runId: string, history = false) {
+    if (!runId || !this.run(runId).subscriptionId)
+      return history ? this.evidence() : this.latestEvidence();
+    const checks = this.all<{ previousId: string; currentId: string }>(
+      'SELECT previousId,currentId FROM source_checks WHERE runId=?',
+      runId
+    );
+    const ids = new Set(
+      checks.flatMap((c) => (history ? [c.previousId, c.currentId] : [c.currentId]))
+    );
+    return this.evidence().filter((e) => ids.has(e.id));
   }
 
   putEvidence(e: Evidence) {
@@ -341,7 +368,7 @@ export class Store extends Database {
         e.url,
         e.content,
         e.kind,
-        e.dataset,
+        'current',
         e.observedAt,
         e.hash,
         JSON.stringify(e.metadata)
@@ -358,7 +385,10 @@ export class Store extends Database {
   }
 
   getEvidence(id: string) {
-    const r = this.get<Record<string, unknown>>('SELECT * FROM evidence WHERE id=?', id);
+    const r = this.get<Record<string, unknown>>(
+      "SELECT * FROM evidence WHERE id=? AND kind IN ('upload','web')",
+      id
+    );
     if (!r) throw new AppError(404, '证据不存在');
 
     return { ...r, metadata: parse(r.metadata, {}) } as unknown as Evidence;
@@ -380,7 +410,7 @@ export class Store extends Database {
       run.prompt.slice(0, 60),
       content,
       JSON.stringify(evidenceIds),
-      run.dataset,
+      'current',
       now()
     );
 
@@ -390,7 +420,14 @@ export class Store extends Database {
   subscriptions() {
     return this.all<Record<string, unknown>>(
       'SELECT * FROM subscriptions ORDER BY createdAt DESC'
-    ).map((r) => ({ ...r, baseline: parse(r.baseline, {}) }) as unknown as Subscription);
+    ).map(
+      (r) =>
+        ({
+          ...r,
+          baseline: parse(r.baseline, {}),
+          sourceIds: parse(r.sourceIds, []),
+        }) as unknown as Subscription
+    );
   }
 
   notifications() {

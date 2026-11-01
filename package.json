@@ -13,7 +13,6 @@
     "start": "node scripts/run.mjs start",
     "test": "node scripts/run.mjs test",
     "test:ui": "node scripts/run.mjs test:ui",
-    "validate:live": "node scripts/run.mjs validate:live",
     "typecheck": "node scripts/run.mjs typecheck",
     "format": "node scripts/run.mjs format"
   },

@@ -46,7 +46,7 @@ export function describeTrace(events: RunEvent[], active: boolean) {
       const toolName = String(event.data.name);
       const name = isTool
         ? toolNames[toolName] || toolName
-        : agentNames[event.agent] || event.agent;
+        : String(event.data.agentName || agentNames[event.agent] || event.agent);
       let status: string;
 
       if (isTool) {
